@@ -24,28 +24,18 @@ namespace WebAssignmentSale.Controllers
         //Start -> View
         public IActionResult SummarySale(string searchQuery, string searchDateQuery, int page = 1)
         {
+            //check session
             var session = _contextAccessor.HttpContext.Session;
 
-            // µÃÇ¨ÊÍºÇèÒÁÕ¢éÍÁÙÅã¹ Session ËÃ×ÍäÁè¡èÍ¹·Õè¨Ð´Ö§¤èÒ
             if (session.GetString("EmpId") != null &&
                 session.GetString("LogId") != null &&
                 session.GetString("PosStatus") != null &&
                 session.GetString("UserName") != null)
             {
-                // ´Ö§¢éÍÁÙÅ¨Ò¡ Session
                 var LoggedInEmpId = session.GetString("EmpId");
                 var LoggedInLogId = session.GetString("LogId");
                 var LoggedInUserName = session.GetString("UserName");
                 var LoggedInPosStatus = session.GetString("PosStatus");
-
-                // ÊÃéÒ§ object Login à¾×èÍ¹Ó¢éÍÁÙÅä»ãªé§Ò¹µèÍ
-                //var user = new Login
-                //{
-                //    EmpId = Convert.ToInt32(LoggedInEmpId),
-                //    LogId = Convert.ToInt32(LoggedInLogId),
-                //    Username = LoggedInUserName,
-                //    PosPermissions = LoggedInPosStatus
-                //};
 
                 try
                 {
@@ -91,9 +81,9 @@ namespace WebAssignmentSale.Controllers
 
         public IActionResult Report(string searchQuery, string searchDateQuery, int page = 1)
         {
+            //check session
             var session = _contextAccessor.HttpContext.Session;
 
-            // µÃÇ¨ÊÍºÇèÒÁÕ¢éÍÁÙÅã¹ Session ËÃ×ÍäÁè¡èÍ¹·Õè¨Ð´Ö§¤èÒ
             if (session.GetString("EmpId") != null &&
                 session.GetString("LogId") != null &&
                 session.GetString("PosStatus") != null &&
@@ -101,25 +91,21 @@ namespace WebAssignmentSale.Controllers
             {
                 try
                 {
-                    //HttpContext.Session.SetString("SearchQuery", searchQuery);
                     ViewBag.SearchQuery = HttpUtility.HtmlDecode(searchQuery);
                     ViewBag.SearchDateQuery = HttpUtility.HtmlDecode(searchDateQuery);
 
-                    int totalItems = GetTotalItemCountReport(searchQuery, searchDateQuery); // ´Ö§¨Ó¹Ç¹ÃÒÂ¡ÒÃ·Ñé§ËÁ´¨Ò¡°Ò¹¢éÍÁÙÅËÃ×Í·Õèà¡çº¢éÍÁÙÅ
-                    int itemsPerPage = 10; // ¨Ó¹Ç¹ÃÒÂ¡ÒÃµèÍË¹éÒ
-                    int pageCount = (int)Math.Ceiling((double)totalItems / itemsPerPage); // ¤Ó¹Ç³¨Ó¹Ç¹Ë¹éÒ·Ñé§ËÁ´
+                    int totalItems = GetTotalItemCountReport(searchQuery, searchDateQuery); 
+                    int itemsPerPage = 10; 
+                    int pageCount = (int)Math.Ceiling((double)totalItems / itemsPerPage); 
 
-                    // µÃÇ¨ÊÍºÇèÒË¹éÒ»Ñ¨¨ØºÑ¹äÁèà¡Ô¹¨Ó¹Ç¹Ë¹éÒ·Ñé§ËÁ´ ¶éÒà¡Ô¹ãËé¡ÓË¹´Ë¹éÒ»Ñ¨¨ØºÑ¹à»ç¹Ë¹éÒÊØ´·éÒÂ
                     if (page > pageCount)
                     {
                         page = pageCount;
                     }
 
 
-                    // ãªé¤èÒ LoggedInEmpId áÅÐË¹éÒ»Ñ¨¨ØºÑ¹ã¹¡ÒÃ´Ö§¢éÍÁÙÅ¨Ò¡°Ò¹¢éÍÁÙÅ
                     var items = GetReportFromDB(searchQuery, page, itemsPerPage, searchDateQuery);
 
-                    // Êè§¢éÍÁÙÅã¹Ë¹éÒ»Ñ¨¨ØºÑ¹áÅÐ¨Ó¹Ç¹Ë¹éÒ·Ñé§ËÁ´ä»ÂÑ§ View
                     var viewModel = new Models.PageModel
                     {
                         Items = items,
@@ -133,112 +119,163 @@ namespace WebAssignmentSale.Controllers
                 }
                 catch (Exception ex)
                 {
-                    // ¨Ñº error áÅÐà¾ÔèÁ¢éÍ¤ÇÒÁ error Å§ã¹ ModelState
                     ModelState.AddModelError("", "An error occurred : " + ex.Message);
                     ViewBag.Error = "An error occurred : " + ex.Message;
-                    return View(); // ËÃ×Í return RedirectToAction("ActionName");
+                    return View(); 
                 }
             }
             else
             {
-                // ËÒ¡äÁèÁÕ¢éÍÁÙÅã¹ Session ãËé redirect ä»ÂÑ§Ë¹éÒ Login
                 TempData["SessionError"] = "Not found session";
-                //TempData["SessionError"] = "äÁè¾º¤èÒã¹ Session Error : " + ex.Message;
                 return RedirectToAction("Login", "Login");
             }
         }
 
-        public IActionResult Insert()
-        {
-            var pos = GetPosFromDB();
-            return View(pos);
-        }
-
         public IActionResult InsertAssignment()
         {
-            var province = GetProvinceInDB();
-            var amphure = GetAmphureInDB();
-            var district = GetDistrictInDB();
-            var address = new AddressModel();
-            address.Provinces = province;
-            address.Amphures = amphure;
-            address.Districts = district;
-            return View(address);
+            //check session
+            var session = _contextAccessor.HttpContext.Session;
+
+            if (session.GetString("EmpId") != null &&
+                session.GetString("LogId") != null &&
+                session.GetString("PosStatus") != null &&
+                session.GetString("UserName") != null)
+            {
+                //start method
+                var province = GetProvinceInDB();
+                var amphure = GetAmphureInDB();
+                var district = GetDistrictInDB();
+                var address = new AddressModel();
+                address.Provinces = province;
+                address.Amphures = amphure;
+                address.Districts = district;
+                return View(address);
+            }
+            else
+            {
+                TempData["SessionError"] = "Not found session";
+                return RedirectToAction("Login", "Login");
+            }
         }
-
-
-
 
         public IActionResult EditAssign(int AssignSaleId, string searchQuery, string searchDateQuery, int page = 1)
         {
-            var sales = GetAssignById(AssignSaleId);
-            var province = GetProvinceInDB();
-            var amphure = GetAmphureById(AssignSaleId);
-            var district = GetDistrictById(AssignSaleId);
-            AddressIdModel address = new AddressIdModel();
-            address.AssignmentSales = sales;
-            address.Provinces = province;
-            address.Amphures = amphure;
-            address.Districts = district;
-            address.CurrentPage = page;
+            //check session
+            var session = _contextAccessor.HttpContext.Session;
 
-            ViewBag.SearchQuery = HttpUtility.UrlEncode(searchQuery);
-            ViewBag.SearchDateQuery = HttpUtility.UrlEncode(searchDateQuery);
+            if (session.GetString("EmpId") != null &&
+                session.GetString("LogId") != null &&
+                session.GetString("PosStatus") != null &&
+                session.GetString("UserName") != null)
+            {
+                //start method
+                var sales = GetAssignById(AssignSaleId);
+                var province = GetProvinceInDB();
+                var amphure = GetAmphureById(AssignSaleId);
+                var district = GetDistrictById(AssignSaleId);
+                AddressIdModel address = new AddressIdModel();
+                address.AssignmentSales = sales;
+                address.Provinces = province;
+                address.Amphures = amphure;
+                address.Districts = district;
+                address.CurrentPage = page;
 
+                ViewBag.SearchQuery = HttpUtility.UrlEncode(searchQuery);
+                ViewBag.SearchDateQuery = HttpUtility.UrlEncode(searchDateQuery);
 
-
-            return View(address);
+                return View(address);
+            }
+            else
+            {
+                TempData["SessionError"] = "Not found session";
+                return RedirectToAction("Login", "Login");
+            }
         }
 
         public IActionResult EditReportAssign(int AssignSaleId, string searchQuery, string searchDateQuery, int page = 1)
         {
-            var sales = GetAssignById(AssignSaleId);
-            var province = GetProvinceInDB();
-            var amphure = GetAmphureById(AssignSaleId);
-            var district = GetDistrictById(AssignSaleId);
-            AddressIdModel address = new AddressIdModel();
-            address.AssignmentSales = sales;
-            address.Provinces = province;
-            address.Amphures = amphure;
-            address.Districts = district;
-            address.CurrentPage = page;
+            //check session
+            var session = _contextAccessor.HttpContext.Session;
 
-            ViewBag.SearchQuery = HttpUtility.UrlEncode(searchQuery);
-            ViewBag.SearchDateQuery = HttpUtility.UrlEncode(searchDateQuery);
+            if (session.GetString("EmpId") != null &&
+                session.GetString("LogId") != null &&
+                session.GetString("PosStatus") != null &&
+                session.GetString("UserName") != null)
+            {
+                //start method
+                var sales = GetAssignById(AssignSaleId);
+                var province = GetProvinceInDB();
+                var amphure = GetAmphureById(AssignSaleId);
+                var district = GetDistrictById(AssignSaleId);
+                AddressIdModel address = new AddressIdModel();
+                address.AssignmentSales = sales;
+                address.Provinces = province;
+                address.Amphures = amphure;
+                address.Districts = district;
+                address.CurrentPage = page;
 
-            return View(address);
+                ViewBag.SearchQuery = HttpUtility.UrlEncode(searchQuery);
+                ViewBag.SearchDateQuery = HttpUtility.UrlEncode(searchDateQuery);
 
+                return View(address);
+            }
+            else
+            {
+                TempData["SessionError"] = "Not found session";
+                return RedirectToAction("Login", "Login");
+            }
         }
 
         public IActionResult EditEmployee(int EmpId)
         {
-            var employee = GetEmployeeById(EmpId);
-            var pos = GetPosFromDB();
-            PositionViewModel nice = new PositionViewModel();
-            nice.Positions = pos;
-            nice.Employee = employee;
+            //check session
+            var session = _contextAccessor.HttpContext.Session;
 
-
-            if (employee == null)
+            if (session.GetString("EmpId") != null &&
+                session.GetString("LogId") != null &&
+                session.GetString("PosStatus") != null &&
+                session.GetString("UserName") != null)
             {
-                return RedirectToAction("Summary", "Home");
+                //start method
+                var employee = GetEmployeeById(EmpId);
+                var pos = GetPosFromDB();
+                PositionViewModel nice = new PositionViewModel();
+                nice.Positions = pos;
+                nice.Employee = employee;
+
+
+                if (employee == null)
+                {
+                    return RedirectToAction("Summary", "Home");
+                }
+                return View(nice);
             }
-            return View(nice);
-
-        }
-
-        public IActionResult EditPosPermissions(int Id)
-        {
-            var position = GetPosById(Id);
-            return View(position);
+            else
+            {
+                TempData["SessionError"] = "Not found session";
+                return RedirectToAction("Login", "Login");
+            }
         }
 
         public IActionResult Setting(int EmpId)
         {
+            //check session
+            var session = _contextAccessor.HttpContext.Session;
 
-            var salesmanager = GetSalesById(EmpId);
-            return View(salesmanager);
-
+            if (session.GetString("EmpId") != null &&
+                session.GetString("LogId") != null &&
+                session.GetString("PosStatus") != null &&
+                session.GetString("UserName") != null)
+            {
+                // start method
+                var salesmanager = GetSalesById(EmpId);
+                return View(salesmanager);
+            }
+            else
+            {
+                TempData["SessionError"] = "Not found session";
+                return RedirectToAction("Login", "Login");
+            }
         }
         //End -> View
 
