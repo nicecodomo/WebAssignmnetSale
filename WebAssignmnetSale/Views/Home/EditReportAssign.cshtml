@@ -1,0 +1,429 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@model AddressIdModel
+
+
+<div class="d-none">
+    @* @Context.Request.Cookies.TryGetValue("LoggedInUsername", out string? LoggedInUsername);
+    @Context.Request.Cookies.TryGetValue("LoggedInEmpId", out string? LoggedInEmpId); *@
+
+</div>
+<div class="container pt-3">
+    <form asp-controller="Home" asp-action="UpdateReportAssign" method="POST" onsubmit="return validateForm()">
+        <div class="card">
+            <div class="card-header bg-lightblue">
+                <div class="d-flex justify-content-between">
+                    <h3>Edit</h3>
+                    <div class="text-end">
+                        <p>Create by : <b>@Model.AssignmentSales.CreateByUsername</b> : @Model.AssignmentSales.CreateDate.ToString("ddd d MMMM yyyy HH:mm:ss") </p>
+                        <p>Update by : <b>@Model.AssignmentSales.LastByUsername</b> : @Model.AssignmentSales.LastUpdateDate.ToString("ddd d MMMM yyyy HH:mm:ss")</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+
+                <div class="mb-3 d-none">
+                    <label for="ass_sale_id" class="form-label">AssignId</label>
+                    <input type="text" class="form-control" id="ass_sale_id" name="assignsaleid" value="@Model.AssignmentSales.AssignSaleId" readonly>
+                </div>
+                <div class="mb-3 d-none">
+                    <label for="LastUpdateBy" class="form-label">Last_Update_By</label>
+                    <input type="tel" class="form-control" id="LastUpdateBy" name="LastUpdateBy" value="@Context.Session.GetString("EmpId")" readonly>
+                </div>
+
+                <div class="row">
+
+                    <div class="col-md-4">
+                        <div class="form-group mb-3">
+                            <label for="ProId" class="form-label">Province <span class="text-danger">*</span></label>
+                            <select class="form-control select2bs4" id="ProId" name="ProId" style="width: 100%;">
+                                <option value="">Select a province...</option>
+                                @foreach (var item in Model.Provinces)
+                                {
+                                    <option value="@item.ProId">@item.PName</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-group mb-3">
+                            <label for="AmpId" class="form-label">Amphure <span class="text-danger">*</span></label>
+                            <select class="form-control select2bs4" id="AmpId" name="AmpId" style="width: 100%;">
+                                <partial name="_AmphurePartial" model="Model.Amphures"></partial>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group mb-3">
+                            <label for="DisId" class="form-label">District</label>
+                            <select class="form-control select2bs4" id="DisId" name="DisId" style="width: 100%;">
+                                <partial name="_DistrictPartial" model="Model.Districts"></partial>
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="row">
+
+                    <div class="col-md-6 col-lg-6 mb-3">
+                        <label for="agency" class="form-label">Agency <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="agency" name="agency" value="@Model.AssignmentSales.Agency">
+                    </div>
+
+                    <div class="col-md-6 col-lg-6 mb-3">
+                        <label for="customer" class="form-label">Customer Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="customer" name="customer" value="@Model.AssignmentSales.Customer">
+                    </div>
+                </div>
+                <div class="row">
+
+                    <div class="col-md-6 col-lg-6 mb-3">
+                        <label for="department" class="form-label">Department <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="department" name="department" value="@Model.AssignmentSales.Department">
+                    </div>
+                    <div class="col-md-6 col-lg-6 mb-3">
+                        <label for="phone_number" class="form-label">Phone Number <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="phone_number" name="phonenumber" value="@Model.AssignmentSales.PhoneNumber">
+                    </div>
+                </div>
+                <div class="row">
+
+                    <div class="col-md-6 col-lg-6 mb-3">
+                        <label for="lineid" class="form-label">LineID <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="lineid" name="lineid" value="@Model.AssignmentSales.LineId">
+                    </div>
+                    <div class="col-md-6 col-lg-6 mb-3">
+                        <label for="annotation" class="form-label">Comment </label>
+                        <input type="text" class="form-control" id="annotation" name="annotation" value="@Model.AssignmentSales.Annotation">
+                    </div>
+                </div>
+
+                <div class="mb-3 d-none">
+                    <label for="latitude" class="form-label">Latitude</label>
+                    <input type="text" class="form-control" id="latitude" name="latitude" value="@Model.AssignmentSales.Latitude" readonly>
+                </div>
+                <div class="mb-3 d-none">
+                    <label for="longitude" class="form-label">Longitude</label>
+                    <input type="text" class="form-control" id="longitude" name="longitude" value="@Model.AssignmentSales.Longitude" readonly>
+                </div>
+
+                <div class="mb-3 form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="AssStatus" name="AssStatus" value="0" onchange="confirmDeleteCustomer()">
+                    <label class="form-check-label" for="AssStatus">Disable</label>
+                </div>
+
+                <div class="row">
+                    <div class="col">
+                        <button type="submit" id="submitBtn" class="btn btn-success" @* onclick="getLocationAndUpdate(event)" *@>Update</button>
+                        <button type="button" data-assignsaleid="@Model.AssignmentSales.AssignSaleId" onclick="getLocationDetails(this)" class="btn btn-warning">
+                            <i class="fa-solid fa-location-dot me-1 text-danger"></i>Location
+                        </button>
+                        <a onclick="redirectToCurrentPage()" class="btn btn-danger">Close</a>
+                    </div>
+                    
+                </div>
+
+
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Start redirect to current page on close button click -->
+<script>
+    // Function to redirect to the current page
+    function redirectToCurrentPage() {
+        // Get the current page number from the URL
+        var urlParams = new URLSearchParams(window.location.search);
+        var currentPage = urlParams.get('page');
+
+        // Redirect to the current page
+        window.location.href = '/Home/Report?page=' + currentPage + '&searchQuery=' + decodeURIComponent('@ViewBag.SearchQuery') + '&searchDateQuery=' + decodeURIComponent('@ViewBag.SearchDateQuery');
+    }
+</script>
+<!-- End redirect to current page on close button click -->
+
+<!-- SweetAlert -->
+<script>
+    //function check change before update
+    $(document).ready(function () {
+        // ตัวแปรเพื่อตรวจสอบว่ามีการแก้ไขข้อมูลหรือไม่
+        var isModified = false;
+
+        // ตัวฟังก์ชันสำหรับตรวจจับการเปลี่ยนแปลงใน input fields
+        $('form :input').on('input', function () {
+            isModified = true;
+        });
+
+        // เมื่อฟอร์มถูกส่ง
+        $('form').submit(function (event) {
+            event.preventDefault();
+            var form = $(this);
+
+            // ตรวจสอบว่ามีการแก้ไขข้อมูลหรือไม่
+            if (!isModified) {
+                // ถ้าไม่มีการแก้ไข แสดงออลเลิร์ท
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Warning',
+                    text: 'No changes detected. Please make some changes before updating.'
+                });
+                return false; // ไม่อนุญาตให้ฟอร์มถูกส่ง
+            } else {
+                if (validateForm()) {
+                    showUpdateConfirmation();
+                }
+                return false;
+            }
+        });
+
+        // Function to validate form before submission
+        function validateForm() {
+            // Check if any required fields are empty
+            var province = document.getElementById('ProId').value;
+            var amphure = document.getElementById('AmpId').value;
+            var agency = document.getElementById('agency').value;
+            var customer = document.getElementById('customer').value;
+            var department = document.getElementById('department').value;
+            var phoneNumber = document.getElementById('phone_number').value;
+            var lineid = document.getElementById('lineid').value;
+
+            // Perform validation
+            if (province === '' || amphure === '' || agency === '' || customer === '' || department === '' || phoneNumber === '' || lineid === '') {
+                // Show SweetAlert for incomplete form
+                Swal.fire({
+                    title: 'Please fill in all required fields.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+                // Prevent form submission
+                return false;
+            } else {
+                // If all fields are filled, show confirmation dialog
+                showUpdateConfirmation();
+                // Prevent form submission here
+                return false;
+            }
+        }
+
+        // Function to show SweetAlert confirmation dialog for update
+        function showUpdateConfirmation() {
+            // Submit the form using AJAX
+            $.ajax({
+                url: $('form').attr('action'),
+                type: $('form').attr('method'),
+                data: $('form').serialize(),
+                success: function (response) {
+                    // If the request is successful, show success message
+                    Swal.fire({
+                        title: 'Success!',
+                        text: 'Data updated successfully.',
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then((result) => {
+                        // Redirect to SummarySale page after closing the alert
+                        window.location.href = '/Home/Report?page=' + encodeURIComponent('@Model.CurrentPage') + '&searchQuery=' + decodeURIComponent('@ViewBag.SearchQuery') + '&searchDateQuery=' + decodeURIComponent('@ViewBag.SearchDateQuery');
+                    });
+                },
+                error: function (xhr, status, error) {
+                    // If there's an error, show error message
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Failed to update data. Please try again.',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            });
+        }
+    });
+</script>
+
+
+<script>
+    // use when get changed in checkbox
+    function confirmDeleteCustomer() {
+        // ตรวจสอบว่า checkbox ถูกเลือกหรือไม่
+        var checkBox = document.getElementById("AssStatus");
+        if (checkBox.checked) {
+            // แสดง SweetAlert แทน confirm
+            Swal.fire({
+                title: 'Do you want to delete this customer?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                // ตรวจสอบผลลัพธ์ที่ผู้ใช้เลือก
+                if (result.isConfirmed) {
+                    // กรณีผู้ใช้เลือกตกลง
+                    //Swal.fire('Customer is deleted', '', 'success');
+                    // ทำการลบข้อมูลพนักงานที่นี่
+                } else {
+                    // กรณีผู้ใช้เลือกยกเลิก
+                    // Swal.fire('employee permissions is canceled', '', 'info');
+                    // ไม่มีการลบข้อมูลที่นี่
+                    // สามารถเพิ่มการกระทำเพิ่มเติมที่นี่เพื่อปรับปรุง
+                    checkBox.checked = false;
+                }
+            });
+        }
+    }
+
+    //get location detail from database
+    function getLocationDetails(button) {
+        var assignSaleId = $(button).data('assignsaleid');
+
+        $.ajax({
+            url: '@Url.Action("GetLocationDetails", "Home")',
+            type: 'GET',
+            data: { assignSaleId: assignSaleId },
+            success: function (data) {
+                console.log('Data received:', data);
+                console.log('AssignSaleId:', assignSaleId);
+                console.log('AssignSaleId:', latitude);
+                console.log('AssignSaleId:', longitude);
+
+                if (data && data.latitude && data.longitude) {
+                    var latitude = data.latitude;
+                    var longitude = data.longitude;
+                    openGoogleMaps(latitude, longitude);
+                } else {
+                    alert('Location details not found or invalid.');
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Error fetching location details:', error);
+            }
+        });
+    }
+
+    //take location to open google map
+    function openGoogleMaps(latitude, longitude) {
+        console.log('Latitude:', latitude);
+        console.log('Longitude:', longitude);
+
+        if (latitude && longitude) {
+            var mapsUrl = 'https://www.google.com/maps?q=' + latitude + ',' + longitude;
+            window.open(mapsUrl);
+        } else {
+            alert('Invalid latitude or longitude.');
+        }
+    }
+
+
+
+</script>
+
+@* Start Check Address in <Select> *@
+<script>
+    // หา element select โดยใช้ id
+    var selectElementProId = document.getElementById('ProId');
+    // ค่า pos_id ของ Employee
+    var empProId = @Model.AssignmentSales.ProId;
+
+    // วนลูปผ่านตัวเลือกทั้งหมดใน select
+    for (var i = 0; i < selectElementProId.options.length; i++) {
+        // ตรวจสอบว่า pos_id ของตัวเลือกตรงกับ pos_id ของ Employee หรือไม่
+        if (selectElementProId.options[i].value == empProId) {
+            // กำหนด selected attribute ให้กับตัวเลือกที่ตรงกัน
+            selectElementProId.options[i].selected = true;
+            // หยุดการวนลูปหากเจอการตรงค่า
+            break;
+        }
+    }
+    var selectElementAmpId = document.getElementById('AmpId');
+    // ค่า pos_id ของ Employee
+    var empAmpId = @Model.AssignmentSales.AmpId;
+
+    // วนลูปผ่านตัวเลือกทั้งหมดใน select
+    for (var i = 0; i < selectElementAmpId.options.length; i++) {
+        // ตรวจสอบว่า pos_id ของตัวเลือกตรงกับ pos_id ของ Employee หรือไม่
+        if (selectElementAmpId.options[i].value == empAmpId) {
+            // กำหนด selected attribute ให้กับตัวเลือกที่ตรงกัน
+            selectElementAmpId.options[i].selected = true;
+            // หยุดการวนลูปหากเจอการตรงค่า
+            break;
+        }
+    }
+    var selectElementDisId = document.getElementById('DisId');
+    // ค่า pos_id ของ Employee
+    var empDisId = @Model.AssignmentSales.DisId;
+
+    // วนลูปผ่านตัวเลือกทั้งหมดใน select
+    for (var i = 0; i < selectElementDisId.options.length; i++) {
+        // ตรวจสอบว่า pos_id ของตัวเลือกตรงกับ pos_id ของ Employee หรือไม่
+        if (selectElementDisId.options[i].value == empDisId) {
+            // กำหนด selected attribute ให้กับตัวเลือกที่ตรงกัน
+            selectElementDisId.options[i].selected = true;
+            // หยุดการวนลูปหากเจอการตรงค่า
+            break;
+        }
+    }
+</script>
+@* End Check Address in <Select> *@
+
+<!-- data province to amphure to district -->
+<script>
+    $(document).ready(function () {
+        $('#ProId').on('change', function () {
+            var proId = $(this).val();
+            if (proId) {
+                // Ajax request to get amphures
+                $.ajax({
+                    url: '@Url.Action("GetAmphureByAjaxInDB", "Home")',
+                    type: 'POST',
+                    data: { proId: proId },
+                    success: function (data) {
+                        // Replace the content of Amphure dropdown
+                        $('#AmpId').html(data);
+                        $('#AmpId').prop('disabled', false);
+                        $('#DisId').prop('disabled', true);
+                        $('#DisId').html('<option value="0">Select an district...</option>');
+                    }
+                });
+            } else {
+                // If proId is empty, disable the Amphure dropdown
+                $('#AmpId').prop('disabled', true);
+                // Optionally, you may clear the options of the Amphure dropdown
+                $('#AmpId').html('<option value="0">Select an amphure...</option>');
+            }
+        });
+
+        // Add similar Ajax request for districts if needed
+    });
+
+
+
+    $(document).ready(function () {
+        $('#AmpId').on('change', function () {
+            var ampId = $(this).val();
+            if (ampId) {
+                // Ajax request to get amphures
+                $.ajax({
+                    url: '@Url.Action("GetDistrictByAjaxInDB", "Home")',
+                    type: 'POST',
+                    data: { ampId: ampId },
+                    success: function (data) {
+                        // Replace the content of Amphure dropdown
+                        $('#DisId').html(data);
+                        $('#DisId').prop('disabled', false);
+                    }
+                });
+            } else {
+                // If proId is empty, disable the Amphure dropdown
+                $('#DisId').prop('disabled', true);
+                // Optionally, you may clear the options of the Amphure dropdown
+                $('#DisId').html('<option value="0">Select an district...</option>');
+            }
+        });
+
+        // Add similar Ajax request for districts if needed
+    });
+
+</script>

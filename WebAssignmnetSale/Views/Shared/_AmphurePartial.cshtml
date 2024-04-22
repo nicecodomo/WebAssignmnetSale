@@ -1,0 +1,10 @@
+﻿@model IEnumerable<Amphure>
+
+
+<option value="">Select an amphure...</option>
+
+
+@foreach (var item in Model)
+{
+    <option value="@item.AmpId">@item.AName</option>
+}

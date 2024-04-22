@@ -1,0 +1,215 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = "_Layout";
+}
+
+<div class="container pt-3">
+
+
+    <div class="card">
+        <div class="card-header bg-gradient-cyan">
+            <h2 class="text-center text-light mt-2">
+                <i class="fa-solid fa-file me-1"></i>
+                Report @(string.IsNullOrEmpty(ViewBag.SearchQuery) ? "" : " : " + ViewBag.SearchQuery) @(string.IsNullOrEmpty(ViewBag.SearchDateQuery) ? "" : " : วันที่ " + ViewBag.SearchDateQuery)
+            </h2>
+
+            <form asp-controller="Home" asp-action="Report">
+                <div class="d-sm-flex d-md-flex d-flex flex-wrap flex-sm-wrap justify-content-end mt-3 mb-2">
+                    <div class="p-1">
+                        <div>
+                            <div class="input-group">
+                                <input class="form-control" type="date" name="searchDateQuery" value="@ViewBag.SearchDateQuery">
+                                <div class="input-group-append">
+                                    <button class="btn bg-gradient-secondary text-light"><i class="fa-solid fa-magnifying-glass"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-1">
+                        <a asp-controller="Home" asp-action="SummarySale" class="btn bg-gradient-primary text-light">
+                            <i class="fas fa-clipboard-list me-1"></i>
+                            Summary
+                        </a>
+                    </div>
+
+                    <div class="p-1">
+                        <a asp-controller="Home" asp-action="InsertAssignment" class="btn bg-gradient-success text-light ">
+                            <i class="fa-solid fas fa-plus me-1"></i>
+                            New Customer
+                        </a>
+                    </div>
+                    <div class="p-1">
+                        <a asp-controller="Recycle" asp-action="Recycle" class="btn bg-gradient-warning ">
+                            <i class="fa-solid fa-trash"></i>
+                        </a>
+                    </div>
+                </div>
+                <!-- Search Form -->
+                <div class="my-2 px-1">
+                    <div class="input-group text-dark">
+                        <input type="text" class="form-control" name="searchQuery" placeholder="Search..." value="@ViewBag.SearchQuery">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+                            <a href="@Url.Action("Report", "Home", new { searchQuery = "", searchDateQuery = "", page = 1 })" class="btn btn-secondary">
+                                <i class="fa-solid fa-rotate-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="card-body table-responsive p-0">
+            @if (Model.Items != null && Model.Items.Count > 0) // ตรวจสอบว่ามีข้อมูลในตารางหรือไม่
+            {
+                <table class="table table-hover table-striped text-start">
+                    <caption class="ms-3">
+                        @(Model.ItemsPerPage * (Model.CurrentPage - 1) + 1) - @(Model.ItemsPerPage * (Model.CurrentPage - 1) + Model.Items.Count) of @(Model.TotalItems) Record
+                    </caption>
+                    <thead class="table-light">
+                        <tr>
+                            <th>No.</th>
+                            <th>Agency</th>
+                            <th>Province</th>
+                            <th>Amphure</th>
+                            <th>District</th>
+                            <th>Customer Name</th>
+                            <th>CreateDate</th>
+                            @*<th>Comment</th>*@
+                            <th>Username</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @{
+                            int startIndex = (Model.CurrentPage - 1) * Model.ItemsPerPage + 1; // คำนวณดัชนีเริ่มต้นของการนับ i
+                            int i = startIndex;
+
+                            @foreach (var item in Model.Items)
+                            {
+                                <tr>
+                                    <td>@i</td>
+                                    <td>@item.Agency</td>
+                                    <td>@item.PName</td>
+                                    <td>@item.AName</td>
+                                    <td>@item.DName</td>
+                                    <td>@item.Customer</td>
+                                    <td>@item.CreateDate</td>
+                                    @*<td>
+                        <span class="text-center"><b>@(string.IsNullOrEmpty(item.Annotation) ? "__" : item.Annotation)</b></span>
+                        </td>*@
+                                    <td>@item.Username</td>
+                                    <td>
+                                        <!-- ส่งค่า latitude และ longitude ไปยังฟังก์ชั่น openGoogleMaps -->
+                                        @*
+                            <button type="button" data-assignsaleid="@item.AssignSaleId" onclick="handleLocationButtonClick(this)" class="btn btn-warning btn-sm me-2">
+                            <i class="fa-solid fa-location-dot me-1 text-danger"></i>Location
+                            </button>
+
+                            <a asp-controller="Home" asp-action="EditReportAssign" asp-route-AssignSaleId="@item.AssignSaleId" class="btn btn-primary btn-sm">
+                            <i class="fa-solid fa-pen-to-square me-1"></i>Edit
+                            </a>
+                            *@
+
+                                        <!--V.2-->
+                                        <a type="button" data-assignsaleid="@item.AssignSaleId" onclick="handleLocationButtonClick(this)" class="me-2">
+                                            <i class="fa-solid fa-location-dot me-1 text-danger"></i>
+                                        </a>
+                                        <!--V.2-->
+                                        <a asp-controller="Home" asp-action="EditReportAssign" asp-route-AssignSaleId="@item.AssignSaleId" asp-route-page="@Model.CurrentPage" asp-route-searchQuery="@ViewBag.SearchQuery" asp-route-searchDateQuery="@ViewBag.SearchDateQuery">
+                                            <i class="fa-solid fa-pen-to-square me-1"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                i++;
+                            }
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="d-flex justify-content-center align-content-center pt-5 pb-5">
+                    <p class="display-6 text-secondary"><b>No data found</b></p>
+                </div>
+            }
+        </div>
+    </div>
+    <!-- Pagination -->
+    <partial name="_Pagination"></partial>
+</div>
+
+
+
+<script>
+    function handleLocationButtonClick(button) {
+        Swal.fire({
+            title: 'Check Location',
+            text: 'Do you want to open in google map?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                getLocationDetails(button);
+            }
+        });
+    }
+
+    function getLocationDetails(button) {
+        var assignSaleId = $(button).data('assignsaleid');
+
+        $.ajax({
+            url: '@Url.Action("GetLocationDetails", "Home")',
+            type: 'GET',
+            data: { assignSaleId: assignSaleId },
+            success: function (data) {
+                console.log('Data received:', data);
+                console.log('AssignSaleId:', assignSaleId);
+                console.log('AssignSaleId:', latitude);
+                console.log('AssignSaleId:', longitude);
+
+                if (data && data.latitude && data.longitude) {
+                    var latitude = data.latitude;
+                    var longitude = data.longitude;
+                    openGoogleMaps(latitude, longitude);
+                } else {
+                    alert('Location details not found or invalid.');
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Error fetching location details:', error);
+            }
+        });
+    }
+
+    function openGoogleMaps(latitude, longitude) {
+        console.log('Latitude:', latitude);
+        console.log('Longitude:', longitude);
+
+        if (latitude && longitude) {
+            Swal.fire({
+                title: 'Choose Google Maps Option',
+                text: 'Do you want to open in a web browser or in the Google Maps app?',
+                showCancelButton: true,
+                confirmButtonText: 'Web Browser',
+                cancelButtonText: 'Google Maps App',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var mapsUrl = 'https://www.google.com/maps?q=' + latitude + ',' + longitude;
+                    window.open(mapsUrl);
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    var mapsAppUrl = 'https://www.google.com/maps/search/?api=1&query=' + latitude + ',' + longitude;
+                    window.open(mapsAppUrl, '_system'); // Open in system default (e.g., Google Maps app on mobile)
+                }
+            });
+        } else {
+            alert('Invalid latitude or longitude.');
+        }
+    }
+
+</script>

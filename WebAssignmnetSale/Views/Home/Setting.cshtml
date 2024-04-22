@@ -1,0 +1,122 @@
+﻿@model Employee
+
+<div class="d-none">
+    @Context.Request.Cookies.TryGetValue("LoggedInUsername", out string? LoggedInUsername);
+    @Context.Request.Cookies.TryGetValue("LoggedInEmpId", out string? LoggedInEmpId);
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+<div class="container pt-3">
+    <form asp-controller="Home" asp-action="UpdateSalesUserInDB" method="POST">
+        <!-- เพิ่มฟิลด์ซ่อนไว้สำหรับรับ EmpId -->
+        <input type="hidden" name="EmpId" value="@Model.EmpId">
+
+        <!-- ส่วนที่เหมือนกับหน้า Add Employee -->
+        <div class="container">
+            <div class="card card-dark">
+                <div class="card-header">
+                    <h3>Edit Profile</h3>
+                </div>
+
+                <div class="mb-3 d-none">
+                    <label for="phone_number" class="form-label">Last_Update_By</label>
+                    <input type="tel" class="form-control" id="LastUpdateBy" name="LastUpdateBy" value="@LoggedInEmpId" readonly>
+                </div>
+                <div class="mb-3 d-none">
+                    <label for="emp_id" class="form-label">EmpId</label>
+                    <input type="tel" class="form-control" id="emp_id" name="empid" value="@LoggedInEmpId" readonly>
+                </div>
+
+                <div class="card-body">
+
+                    <!-- Button trigger modal -->
+                    <button type="button" class="btn btn-success form-label" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                        Personal Information
+                    </button>
+
+
+
+                    <div class="mb-3">
+                        <label for="emp_name" class="form-label">Name</label>
+                        <input type="text" class="form-control" value="@Model.EmpName" required readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" value="@Model.Username" required disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="text" class="form-control" id="password" name="password" value="@Model.Password" required>
+                    </div>
+
+
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog ">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Sales Information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <div class="mb-3">
+                    <label for="emp_name" class="form-label">Employee Name</label>
+                    <p class="">@Model.EmpName</p>
+                </div>
+                <div class="mb-3">
+                    <label for="date_of_birth" class="form-label">Date of Birth</label>
+                    <p>@Model.DateOfBirth.ToString("yyyy-MM-dd")</p>
+                </div>
+                <div class="mb-3">
+                    <label for="address" class="form-label">Address</label>
+                    <p>@Model.Address</p>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <p>@Model.Email</p>
+                </div>
+                <div class="mb-3">
+                    <label for="phone_number" class="form-label">Phone Number</label>
+                    <p>@Model.PhoneNumber</p>
+                </div>
+                <div class="mb-3">
+                    <label for="salary" class="form-label">Salary</label>
+                    <p>@Model.Salary</p>
+                </div>
+                <div class="mb-3">
+                    <label for="start_date" class="form-label">Start Date</label>
+                    <p>@Model.StartDate.ToString("yyyy-MM-dd")</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // หา element select โดยใช้ id
+    var selectElement = document.getElementById('pos_id');
+    // ค่า pos_id ของ Employee
+    var empPosId = @Model.PosId;
+
+    // วนลูปผ่านตัวเลือกทั้งหมดใน select
+    for (var i = 0; i < selectElement.options.length; i++) {
+        // ตรวจสอบว่า pos_id ของตัวเลือกตรงกับ pos_id ของ Employee หรือไม่
+        if (selectElement.options[i].value == empPosId) {
+            // กำหนด selected attribute ให้กับตัวเลือกที่ตรงกัน
+            selectElement.options[i].selected = true;
+            // หยุดการวนลูปหากเจอการตรงค่า
+            break;
+        }
+    }
+</script>

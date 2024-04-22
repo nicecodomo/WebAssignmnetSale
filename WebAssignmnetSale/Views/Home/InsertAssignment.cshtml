@@ -1,0 +1,362 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@model AddressModel
+
+<div class="d-none">
+    @* @Context.Request.Cookies.TryGetValue("LoggedInUsername", out string? LoggedInUsername);
+    @Context.Request.Cookies.TryGetValue("LoggedInEmpId", out string? LoggedInEmpId); *@
+
+</div>
+<div class="container pt-3">
+    <form asp-controller="Home" asp-action="InsertAssign" method="POST" id="insertForm">
+        <div class="card">
+
+            <div class="card-header bg-green">
+                <h3>Insert Customer</h3>
+                @* <p class="d-flex justify-content-end">Create By : @LoggedInUsername</p> *@
+            </div>
+
+            <div class="card-body">
+
+                <div class="mb-3 d-none">
+                    <label for="create_by" class="form-label">Create_By</label>
+                    <input type="text" class="form-control" id="CreateBy" name="CreateBy" value="@Context.Session.GetString("EmpId")" required readonly>
+                </div>
+                <div class="mb-3 d-none">
+                    <label for="last_update_by" class="form-label">Last_Update_By</label>
+                    <input type="text" class="form-control" id="LastUpdateBy" name="LastUpdateBy" value="@Context.Session.GetString("EmpId")" required readonly>
+                </div>
+
+
+                <div class="row">
+
+                    <div class="col-md-4">
+                        <div class="form-group mb-3">
+                            <label for="ProId" class="form-label">Province <span class="text-danger">*</span></label>
+                            <select class="form-control select2bs4" id="ProId" name="ProId" style="width: 100%;">
+                                <option value="">Select a province...</option>
+                                @foreach (var item in Model.Provinces)
+                                {
+                                    <option value="@item.ProId">@item.PName</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-group mb-3">
+                            <label for="AmpId" class="form-label">Amphure <span class="text-danger">*</span></label>
+                            <select class="form-control select2bs4" id="AmpId" name="AmpId" style="width: 100%;" disabled>
+                                <option value="">Select an amphure...</option>
+                                <partial name="_AmphurePartial" model="Model.Amphures"></partial>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group mb-3">
+                            <label for="DisId" class="form-label">District</label>
+                            <select class="form-control select2bs4" id="DisId" name="DisId" style="width: 100%;" disabled>
+                                <option value="">Select an district...</option>
+                                <partial name="_DistrictPartial" model="Model.Districts"></partial>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 col-lg-6 mb-3">
+                        <label for="agency" class="form-label">Agency <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="agency" name="agency" >
+                    </div>
+                    <div class="col-md-6 col-lg-6 mb-3">
+                        <label for="customer" class="form-label">Customer Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="customer" name="customer" >
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 col-lg-6 mb-3">
+                        <label for="department" class="form-label">Department <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="department" name="department" >
+                    </div>
+                    <div class="col-md-6 col-lg-6 mb-3">
+                        <label for="phone_number" class="form-label">Phone Number <span class="text-danger">*</span></label>
+                        <input type="tel" class="form-control" id="phone_number" name="phonenumber" >
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 col-lg-6 mb-3">
+                        <label for="lineid" class="form-label">LineID <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="lineid" name="lineid" >
+                    </div>
+                    <div class="col-md-6 col-lg-6 mb-3">
+                        <label for="annotation" class="form-label">Comment</label>
+                        <input type="text" class="form-control" id="annotation" name="annotation">
+                    </div>
+                </div>
+
+
+                <!-- เพิ่ม input สำหรับรับตำแหน่งปัจจุบัน -->
+                <input type="hidden" id="latitude" name="latitude" />
+                <input type="hidden" id="longitude" name="longitude" />
+
+
+                <div class="mb-3 d-none">
+                    <label for="emp_id" class="form-label">EmpId</label>
+                    <input type="text" class="form-control" id="emp_id" name="empid" value="@Context.Session.GetString("EmpId")" required readonly>
+                </div>
+
+                <button type="button" onclick="getLocation()" class="btn btn-primary">Check-In</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    function getLocation() {
+        // เพิ่มเงื่อนไขตรวจสอบข้อมูลที่ต้องการ
+        var proid = document.getElementById('ProId').value;
+        var ampid = document.getElementById('AmpId').value;
+        var agency = document.getElementById('agency').value;
+        var customer = document.getElementById('customer').value;
+        var department = document.getElementById('department').value;
+        var phonenumber = document.getElementById('phone_number').value;
+        var lineid = document.getElementById('lineid').value;
+
+        // ตรวจสอบว่าข้อมูลที่ต้องการกรอกครบถ้วนหรือไม่
+        if (!agency || !proid || !ampid || !customer || !department || !phonenumber || !lineid) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Please fill in all required fields before checking in.'
+            });
+            return; // ไม่ได้กรอกข้อมูลครบถ้วน, ไม่ต้องดำเนินการต่อ
+        }
+
+        // V.2
+        if (navigator.geolocation) {
+            Swal.fire({
+                title: 'Requesting permission...',
+                text: 'Please allow access to your location to proceed.',
+                showCancelButton: true,
+                confirmButtonText: 'Allow',
+                cancelButtonText: 'Deny',
+                allowOutsideClick: false,
+                allowEscapeKey: false, // Prevent closing the modal by pressing the escape key
+                showLoaderOnConfirm: true,
+                preConfirm: () => {
+                    Swal.showLoading(); // แสดงโหลดเมื่อกดปุ่ม Allow
+                    return new Promise((resolve, reject) => {
+                        // เพิ่ม PositionOptions ด้วยการตั้งค่า enableHighAccuracy เป็น true
+                        navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true });
+                    }).then((position) => {
+                        // User allowed access, handle location data
+                        document.getElementById('latitude').value = position.coords.latitude;
+                        document.getElementById('longitude').value = position.coords.longitude;
+                        document.getElementById('insertForm').submit();
+                    }).catch((error) => {
+                        // Error handling
+                        if (error.code === error.PERMISSION_DENIED) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Location Access Denied',
+                                text: 'You have denied access to your location. This feature requires access to your location to function properly. Please grant permission to proceed.'
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Failed to retrieve location: ' + error.message,
+                            });
+                        }
+                    });
+                }
+            }).then((result) => {
+                if (result.dismiss === Swal.DismissReason.cancel) {
+                    // User denied access
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Access Denied',
+                        text: 'You have denied access to your location. This feature requires access to your location to function properly.'
+                    });
+                }
+            });
+        } else {
+            // Geolocation not supported
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Geolocation is not supported by this browser. This feature requires access to your location to function properly.'
+            });
+        }
+
+        // ฟังก์ชันเพื่อดึงตำแหน่งโดยใช้เทคนิคการปรับปรุงเชิงสถิติ
+        // function getAccuratePosition(attempts) {
+        //     return new Promise((resolve, reject) => {
+        //         let positions = [];
+
+        //         function onError(error) {
+        //             if (attempts === 1) {
+        //                 reject(error);
+        //             } else {
+        //                 attempts--;
+        //                 getPosition();
+        //             }
+        //         }
+
+        //         function onSuccess(position) {
+        //             positions.push(position); // เก็บตำแหน่งที่ได้รับไว้ในอาร์เรย์ positions
+        //             console.log("Received position:", position.coords.latitude, position.coords.longitude); // แสดงตำแหน่งที่ได้รับในคอนโซล
+        //             if (positions.length >= attempts) { // เมื่อได้รับตำแหน่งครบ 10 ครั้ง
+        //                 let sortedPositions = positions.sort((a, b) => a.coords.accuracy - b.coords.accuracy); // เรียงลำดับตำแหน่งตามความแม่นยำ
+        //                 resolve(sortedPositions[0]); // ส่งตำแหน่งที่แม่นยำที่สุดกลับไป
+        //             } else {
+        //                 getPosition(); // ดึงตำแหน่งอีกครั้งหากยังไม่ครบ 10 ครั้ง
+        //             }
+        //         }
+
+
+        //         function getPosition() {
+        //             navigator.geolocation.getCurrentPosition(onSuccess, onError, { enableHighAccuracy: false });
+        //         }
+
+        //         getPosition();
+        //     });
+        // }
+
+        // // เรียกใช้ฟังก์ชันเพื่อดึงตำแหน่งที่แม่นยำที่สุด
+        // getAccuratePosition(5)
+        //     .then(position => {
+        //         // ดำเนินการกับตำแหน่งที่แม่นยำที่สุดที่ได้รับ
+        //         document.getElementById('latitude').value = position.coords.latitude;
+        //         document.getElementById('longitude').value = position.coords.longitude;
+        //         document.getElementById('insertForm').submit();
+        //     })
+        //     .catch(error => {
+        //         // การจัดการข้อผิดพลาดเมื่อไม่สามารถดึงตำแหน่งที่แม่นยำได้
+        //         console.error('Failed to retrieve accurate location:', error);
+        //     });
+
+
+
+
+
+
+
+        // function getAccuratePosition(attempts) {
+        //     return new Promise((resolve, reject) => {
+        //         let positions = [];
+
+        //         function onError(error) {
+        //             if (attempts === 0) {
+        //                 resolve(positions); // ส่งตำแหน่งทั้งหมดกลับไปหลังจากที่ได้รับตำแหน่งครบตามจำนวน attempts
+        //             } else {
+        //                 attempts--;
+        //                 getPosition();
+        //             }
+        //         }
+
+        //         function onSuccess(position) {
+        //             positions.push(position); // เก็บตำแหน่งที่ได้รับไว้ในอาร์เรย์ positions
+        //             console.log("Received position:", position.coords.latitude, position.coords.longitude); // แสดงตำแหน่งที่ได้รับในคอนโซล
+        //             if (positions.length >= attempts) { // เมื่อได้รับตำแหน่งครบตามจำนวน attempts
+        //                 resolve(positions); // ส่งตำแหน่งทั้งหมดกลับไป
+        //             } else {
+        //                 getPosition(); // ดึงตำแหน่งอีกครั้งหากยังไม่ครบจำนวน attempts
+        //             }
+        //         }
+
+        //         function getPosition() {
+        //             navigator.geolocation.getCurrentPosition(onSuccess, onError, { enableHighAccuracy: true });
+        //         }
+
+        //         getPosition();
+        //     });
+        // }
+
+        // // เรียกใช้ฟังก์ชันเพื่อดึงตำแหน่งที่แม่นยำที่สุด 10 ครั้ง
+        // getAccuratePosition(1)
+        //     .then(positions => {
+        //         // ดำเนินการกับตำแหน่งที่ได้รับทั้งหมด
+        //         positions.forEach((position, index) => {
+        //             console.log("Position", index + 1, ":", position.coords.latitude, position.coords.longitude);
+        //         });
+        //         // เลือกตำแหน่งที่แม่นยำที่สุดที่ได้รับเพียงครั้งเดียว
+        //         let sortedPositions = positions.sort((a, b) => a.coords.accuracy - b.coords.accuracy);
+        //         let mostAccuratePosition = sortedPositions[0];
+        //         document.getElementById('latitude').value = mostAccuratePosition.coords.latitude;
+        //         document.getElementById('longitude').value = mostAccuratePosition.coords.longitude;
+        //         document.getElementById('insertForm').submit();
+        //     })
+        //     .catch(error => {
+        //         // การจัดการข้อผิดพลาดเมื่อไม่สามารถดึงตำแหน่งที่แม่นยำได้
+        //         console.error('Failed to retrieve accurate location:', error);
+        //     });
+    }
+</script>
+
+<!-- data province to amphure to district -->
+<script>
+    $(document).ready(function () {
+        $('#ProId').on('change', function () {
+            var proId = $(this).val();
+            if (proId) {
+                // Ajax request to get amphures
+                $.ajax({
+                    url: '@Url.Action("GetAmphureByAjaxInDB", "Home")',
+                    type: 'POST',
+                    data: { proId: proId },
+                    success: function (data) {
+                        // Replace the content of Amphure dropdown
+                        $('#AmpId').html(data);
+                        $('#AmpId').prop('disabled', false);
+                        $('#DisId').prop('disabled', true);
+                    }
+                });
+            } else {
+                // If proId is empty, disable the Amphure dropdown
+                $('#AmpId').prop('disabled', true);
+                // Optionally, you may clear the options of the Amphure dropdown
+                $('#AmpId').html('<option value="">Select an amphure...</option>');
+            }
+        });
+
+        // Add similar Ajax request for districts if needed
+    });
+
+
+
+    $(document).ready(function () {
+        $('#AmpId').on('change', function () {
+            var ampId = $(this).val();
+            if (ampId) {
+                // Ajax request to get amphures
+                $.ajax({
+                    url: '@Url.Action("GetDistrictByAjaxInDB", "Home")',
+                    type: 'POST',
+                    data: { ampId: ampId },
+                    success: function (data) {
+                        // Replace the content of Amphure dropdown
+                        $('#DisId').html(data);
+                        $('#DisId').prop('disabled', false);
+                    }
+                });
+            } else {
+                // If proId is empty, disable the Amphure dropdown
+                $('#DisId').prop('disabled', true);
+                // Optionally, you may clear the options of the Amphure dropdown
+                $('#DisId').html('<option value="">Select an district...</option>');
+            }
+        });
+        // Add similar Ajax request for districts if needed
+    });
+
+</script>
+
+
+
+

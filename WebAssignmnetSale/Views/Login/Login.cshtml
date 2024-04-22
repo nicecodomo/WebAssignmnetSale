@@ -1,0 +1,185 @@
+﻿@{
+    Layout = null;
+}
+@model WebAssignmentSale.Models.Login
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AssignmentSale | Login</title>
+
+    <!-- Google Font: Source Sans Pro -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="~/plugins/fontawesome-free/css/all.min.css">
+    <!-- icheck bootstrap -->
+    <link rel="stylesheet" href="~/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="~/dist/css/adminlte.min.css">
+    <!-- Toastr -->
+    <link rel="stylesheet" href="~/plugins/toastr/toastr.min.css">
+
+    <style>
+        body {
+            position: fixed;
+            width: 100%;
+        }
+
+    </style>
+</head>
+
+<body class="hold-transition login-page bg-dark">
+
+    <!--Alert ViewBag From LoginController-->
+    @if (!string.IsNullOrEmpty(ViewBag.AlertError))
+    {
+        <div class="alert alert-danger" role="alert">
+            @ViewBag.AlertError
+        </div>
+    }
+
+    <!--Alert TempData From HomeController-->
+    @if (TempData["SessionError"] != null)
+    {
+        <div class="alert alert-danger" role="alert">
+            @TempData["SessionError"]
+        </div>
+    }
+
+    <!--Alert TempData From LoginController-->
+    @if (TempData["LoginError"] != null)
+    {
+        <div class="alert alert-danger" role="alert">
+            @TempData["LoginError"]
+        </div>
+    }
+
+    <!--Alert ModelState From LoginController-->
+    @* @if (!ViewData.ModelState.IsValid)
+    {
+        @foreach (var field in ViewData.ModelState)
+        {
+            @if (field.Key == "Username" || field.Key == "Password")
+            {
+                @if (field.Value.Errors.Any())
+                {
+                    <div class="alert alert-danger" role="alert">
+                        <span>@field.Value.Errors.First().ErrorMessage</span>
+                    </div>
+                }
+            }
+        }
+    } *@
+
+
+    <div class="login-box ">
+        <!-- /.login-logo -->
+        <div class="">
+            <div class=" text-center text-primary">
+                <a href="" class="h1"><b>Assignment</b>Sale</a>
+            </div>
+
+
+
+            <div class="card-body text-dark">
+
+
+                <form asp-controller="Login" asp-action="Login" method="post">
+                    <div class="input-group py-2">
+                        <input id="Username" name="Username" asp-for="Username" type="text" class="form-control" placeholder="Enter Username">
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-envelope"></span>
+                            </div>
+                        </div>
+                    </div>
+                    @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ContainsKey("Username"))
+                    {
+                        <span class="text-danger"><b>@ViewData.ModelState["Username"].Errors.FirstOrDefault()?.ErrorMessage</b></span>
+                    }
+                    <div class="input-group py-2">
+                        <input id="Password" name="Password" asp-for="Password" type="password" class="form-control" placeholder="Enter Password">
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-lock"></span>
+                            </div>
+                        </div>
+                    </div>
+                    @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ContainsKey("Password"))
+                    {
+                        <span class="text-danger"><b>@ViewData.ModelState["Password"].Errors.FirstOrDefault()?.ErrorMessage</b></span>
+                    }
+
+                    <div class="row pt-1">
+                        <div class="col-8">
+                            <div class="icheck-primary text-light">
+                                <input type="checkbox" id="remember" name="RememberMe">
+                                <label for="remember">
+                                    Remember Me
+                                </label>
+                            </div>
+                        </div>
+                        <!-- /.col -->
+                        <div class="col-4">
+                            <button id="submit" type="submit" class="btn btn-primary btn-block">Sign In</button>
+                        </div>
+                        <!-- /.col -->
+
+                        
+                        @* Toast Alert 
+                        <button type="button" class="btn btn-danger swalDefaultError">
+                            Test Error Toast
+                        </button> *@
+                    </div>
+                </form>
+
+
+
+
+            </div>
+
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+    </div>
+    <!-- /.login-box -->
+    <!-- jQuery -->
+    <script src="~/plugins/jquery/jquery.min.js"></script>
+    <!-- Bootstrap 4 -->
+    <script src="~/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- AdminLTE App -->
+    <!-- SweetAlert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Toastr -->
+    <script src="~/plugins/toastr/toastr.min.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="~/plugins/sweetalert2/sweetalert2.min.js"></script>
+
+    <!--Alert ViewData-->
+    @if (ViewData["LoginError"] != null)
+    {
+        @Html.Raw(ViewData["LoginError"])
+    }
+
+    @* <script>
+        $(function () {
+            var Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000
+            });
+            $('.swalDefaultError').click(function () {
+                Toast.fire({
+                    icon: 'error',
+                    title: 'ฮันแน่!! สวยไหมล่ะ'
+                })
+            });
+        });
+
+    </script> *@
+
+</body>
+</html>

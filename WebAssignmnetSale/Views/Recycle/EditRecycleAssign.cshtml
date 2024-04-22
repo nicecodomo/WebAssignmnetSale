@@ -1,0 +1,309 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@model AddressIdModel
+
+
+<div class="d-none">
+    @* @Context.Request.Cookies.TryGetValue("LoggedInUsername", out string? LoggedInUsername);
+    @Context.Request.Cookies.TryGetValue("LoggedInEmpId", out string? LoggedInEmpId);
+ *@
+</div>
+<div class="container pt-3">
+    <form asp-controller="Recycle" asp-action="UpdateRecycleAssign" onsubmit="return validateForm()">
+        <div class="card card-dark">
+            <div class="card-header">
+                <h3>Restore</h3>
+                <div class="d-flex justify-content-end">
+                    <div class="">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body">
+
+                <div class="mb-3 d-none">
+                    <label for="ass_sale_id" class="form-label">AssignId</label>
+                    <input type="text" class="form-control" id="ass_sale_id" name="assignsaleid" value="@Model.AssignmentSales.AssignSaleId" readonly>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group mb-3">
+                            <label for="ProId" class="form-label">Province <span class="text-danger">*</span></label>
+                            <select class="form-control select2bs4" id="ProId" name="ProId" style="width: 100%;" required disabled>
+                                <option value="">Select a province...</option>
+                                @foreach (var item in Model.Provinces)
+                                {
+                                    <option value="@item.ProId">@item.PName</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group mb-3">
+                            <label for="AmpId" class="form-label">Amphure <span class="text-danger">*</span></label>
+                            <select class="form-control select2bs4" id="AmpId" name="AmpId" style="width: 100%;" disabled>
+                                <partial name="_AmphurePartial" model="Model.Amphures"></partial>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group mb-3">
+                            <label for="DisId" class="form-label">District</label>
+                            <select class="form-control select2bs4" id="DisId" name="DisId" style="width: 100%;" disabled>
+                                <partial name="_DistrictPartial" model="Model.Districts"></partial>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <label for="agency" class="form-label">Agency <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="agency" name="agency" value="@Model.AssignmentSales.Agency" required readonly>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <label for="customer" class="form-label">Customer Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="customer" name="customer" value="@Model.AssignmentSales.Customer" required readonly>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <label for="department" class="form-label">Department <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="department" name="department" value="@Model.AssignmentSales.Department" required readonly>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <label for="phone_number" class="form-label">Phone Number <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="phone_number" name="phonenumber" value="@Model.AssignmentSales.PhoneNumber" required readonly>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <label for="lineid" class="form-label">LineID <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="lineid" name="lineid" value="@Model.AssignmentSales.LineId" required readonly>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <label for="annotation" class="form-label">Comment </label>
+                        <input type="text" class="form-control" id="annotation" name="annotation" value="@Model.AssignmentSales.Annotation" readonly>
+                    </div>
+                </div>
+
+                <div class="mb-3 d-none">
+                    <label for="latitude" class="form-label">Latitude</label>
+                    <input type="text" class="form-control" id="latitude" name="latitude" value="@Model.AssignmentSales.Latitude" readonly>
+                </div>
+                <div class="mb-3 d-none">
+                    <label for="longitude" class="form-label">Longitude</label>
+                    <input type="text" class="form-control" id="longitude" name="longitude" value="@Model.AssignmentSales.Longitude" readonly>
+                </div>
+
+                <div class="mb-3 form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="AssStatus" name="AssStatus" value="1" onchange="confirmRestoreCustomer()">
+                    <label class="form-check-label" for="AssStatus">Enable</label>
+                </div>
+
+                <button type="submit" id="submitBtn" class="btn btn-success me-2" disabled @* onclick="getLocationAndUpdate(event)" *@>Restore</button>
+
+                <button type="button" data-assignsaleid="@Model.AssignmentSales.AssignSaleId" onclick="getLocationDetails(this)" class="btn btn-warning me-2">
+                    <i class="fa-solid fa-location-dot me-1 text-danger"></i>Location
+                </button>
+
+                <a onclick="redirectToCurrentPage()" class="btn btn-danger me-2">Close</a>
+
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Start redirect to current page on close button click -->
+<script>
+    // Function to redirect to the current page
+    function redirectToCurrentPage() {
+        // Get the current page number from the URL
+        var urlParams = new URLSearchParams(window.location.search);
+        var currentPage = urlParams.get('page');
+
+        // Redirect to the current page
+        window.location.href = '@Url.Action("Recycle", "Recycle")' + '?page=' + currentPage + '&searchQuery=' + decodeURIComponent('@ViewBag.SearchQuery');
+    }
+
+    // Function to validate form before submission
+    function validateForm() {
+        // Check if any required fields are empty
+        var province = document.getElementById('ProId').value;
+        var amphure = document.getElementById('AmpId').value;
+        var agency = document.getElementById('agency').value;
+        var customer = document.getElementById('customer').value;
+        var department = document.getElementById('department').value;
+        var phoneNumber = document.getElementById('phone_number').value;
+        var lineid = document.getElementById('lineid').value;
+
+        // Perform validation
+        if (province === '' || amphure === '' || agency === '' || customer === '' || department === '' || phoneNumber === '' || lineid === '') {
+            // Show SweetAlert for incomplete form
+            Swal.fire({
+                title: 'Please fill in all required fields.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            // Prevent form submission
+            return false;
+        } else {
+            // If all fields are filled, show confirmation dialog
+            RestoreAssign();
+            // Prevent form submission here
+            return false;
+        }
+    }
+
+    // Function to show SweetAlert confirmation dialog for update
+    function RestoreAssign() {
+        // Submit the form using AJAX
+        $.ajax({
+            url: $('form').attr('action'),
+            type: $('form').attr('method'),
+            data: $('form').serialize(),
+            success: function (response) {
+                // If the request is successful, show success message
+                Swal.fire({
+                    title: 'Success!',
+                    text: 'Data updated successfully.',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    // Redirect to SummarySale page after closing the alert
+                    window.location.href = '/Recycle/Recycle?page=' + encodeURIComponent('@Model.CurrentPage') + '&searchQuery=' + decodeURIComponent('@ViewBag.SearchQuery');
+                });
+            },
+            error: function (xhr, status, error) {
+                // If there's an error, show error message
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Failed to update data. Please try again.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+        });
+    }
+</script>
+<!-- End redirect to current page on close button click -->
+
+
+<script>
+    // Function to confirm restore customer checkbox
+    function confirmRestoreCustomer() {
+        // Check if the restore customer checkbox is checked
+        var restoreCheckbox = document.getElementById("AssStatus");
+        // Enable or disable the restore button based on the checkbox status
+        var restoreButton = document.getElementById("submitBtn");
+        if (restoreCheckbox.checked) {
+            // If the checkbox is checked, enable the restore button
+            restoreButton.disabled = false;
+        } else {
+            // If the checkbox is not checked, disable the restore button
+            restoreButton.disabled = true;
+            // Show SweetAlert for unchecked checkbox
+            // Swal.fire({
+            //     title: 'Please check the "Restore Customer" checkbox.',
+            //     icon: 'warning',
+            //     confirmButtonText: 'OK'
+            // });
+        }
+    }
+</script>
+
+<script>
+
+    //get location detail from database
+    function getLocationDetails(button) {
+        var assignSaleId = $(button).data('assignsaleid');
+
+        $.ajax({
+            url: '@Url.Action("GetLocationDetails", "Home")',
+            type: 'GET',
+            data: { assignSaleId: assignSaleId },
+            success: function (data) {
+
+                if (data && data.latitude && data.longitude) {
+                    var latitude = data.latitude;
+                    var longitude = data.longitude;
+                    openGoogleMaps(latitude, longitude);
+                } else {
+                    alert('Location details not found or invalid.');
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Error fetching location details:', error);
+            }
+        });
+    }
+
+    //take location to open google map
+    function openGoogleMaps(latitude, longitude) {
+        console.log('Latitude:', latitude);
+        console.log('Longitude:', longitude);
+
+        if (latitude && longitude) {
+            var mapsUrl = 'https://www.google.com/maps?q=' + latitude + ',' + longitude;
+            window.open(mapsUrl);
+        } else {
+            alert('Invalid latitude or longitude.');
+        }
+    }
+
+
+</script>
+
+@* Start Check Address in <Select> *@
+<script>
+    // หา element select โดยใช้ id
+    var selectElementProId = document.getElementById('ProId');
+    // ค่า pos_id ของ Employee
+    var empProId = @Model.AssignmentSales.ProId;
+
+    // วนลูปผ่านตัวเลือกทั้งหมดใน select
+    for (var i = 0; i < selectElementProId.options.length; i++) {
+        // ตรวจสอบว่า pos_id ของตัวเลือกตรงกับ pos_id ของ Employee หรือไม่
+        if (selectElementProId.options[i].value == empProId) {
+            // กำหนด selected attribute ให้กับตัวเลือกที่ตรงกัน
+            selectElementProId.options[i].selected = true;
+            // หยุดการวนลูปหากเจอการตรงค่า
+            break;
+        }
+    }
+    var selectElementAmpId = document.getElementById('AmpId');
+    // ค่า pos_id ของ Employee
+    var empAmpId = @Model.AssignmentSales.AmpId;
+
+    // วนลูปผ่านตัวเลือกทั้งหมดใน select
+    for (var i = 0; i < selectElementAmpId.options.length; i++) {
+        // ตรวจสอบว่า pos_id ของตัวเลือกตรงกับ pos_id ของ Employee หรือไม่
+        if (selectElementAmpId.options[i].value == empAmpId) {
+            // กำหนด selected attribute ให้กับตัวเลือกที่ตรงกัน
+            selectElementAmpId.options[i].selected = true;
+            // หยุดการวนลูปหากเจอการตรงค่า
+            break;
+        }
+    }
+    var selectElementDisId = document.getElementById('DisId');
+    // ค่า pos_id ของ Employee
+    var empDisId = @Model.AssignmentSales.DisId;
+
+    // วนลูปผ่านตัวเลือกทั้งหมดใน select
+    for (var i = 0; i < selectElementDisId.options.length; i++) {
+        // ตรวจสอบว่า pos_id ของตัวเลือกตรงกับ pos_id ของ Employee หรือไม่
+        if (selectElementDisId.options[i].value == empDisId) {
+            // กำหนด selected attribute ให้กับตัวเลือกที่ตรงกัน
+            selectElementDisId.options[i].selected = true;
+            // หยุดการวนลูปหากเจอการตรงค่า
+            break;
+        }
+    }
+</script>
+@* End Check Address in <Select> *@
