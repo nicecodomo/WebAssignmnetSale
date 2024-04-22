@@ -25,17 +25,23 @@ namespace WebAssignmentSale.Controllers
             //_session = httpContextAccessor.HttpContext.Session;
         }
 
+        [HttpGet]
         public IActionResult Login()
         {
-            //if (Request.Cookies.ContainsKey("username") && Request.Cookies.ContainsKey("password"))
-            //{
-            //    var username = Request.Cookies["username"];
-            //    var password = Request.Cookies["password"];
+            if (Request.Cookies.ContainsKey("username") && Request.Cookies.ContainsKey("password"))
+            {
+                var Username = Request.Cookies["username"];
+                var Password = Request.Cookies["password"];
 
-            //    // เติมข้อมูลในฟอร์ม
-            //    var model = new Login { Username = username, Password = password };
-            //    return View(model);
-            //}
+                // เติมข้อมูลในฟอร์ม
+                var model = new Login { Username = Username, Password = Password };
+                return View(model);
+            }
+
+            if (TempData.ContainsKey("SessionError"))
+            {
+                ViewData["SessionError"] = TempData["SessionError"].ToString();
+            }
 
             return View();
         }
@@ -49,7 +55,6 @@ namespace WebAssignmentSale.Controllers
                 using (MySqlConnection connection = new MySqlConnection(_configuration.GetConnectionString("connectionStr")))
                 {
                     
-
                     connection.Open();
 
                     string sqlquery = "SELECT  a.*,l.*,p.*,e.*,po.* FROM tb_access AS a " +
@@ -69,17 +74,15 @@ namespace WebAssignmentSale.Controllers
 
                     var reader = cmd.ExecuteReader();
 
-                    
-
                     if (reader.Read())
                     {
 
-                        //if (rememberMe)
-                        //{
-                        //    // บันทึกข้อมูลการเข้าสู่ระบบลงในคุกกี้
-                        //    Response.Cookies.Append("username", login.Username);
-                        //    Response.Cookies.Append("password", login.Password);
-                        //}
+                        if (login.RememberMe)
+                        {
+                            // บันทึกข้อมูลการเข้าสู่ระบบลงในคุกกี้
+                            Response.Cookies.Append("username", login.Username);
+                            Response.Cookies.Append("password", login.Password);
+                        }
 
                         //นำข้อมูลใส่ใน cookie เพื่อนำไปใช้ที่อื่น
                         //HttpContext.Response.Cookies.Append("LoggedInEmpId", Convert.ToInt32(reader["emp_id"]).ToString());

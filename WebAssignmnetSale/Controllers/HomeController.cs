@@ -8,6 +8,7 @@ using WebAssignmentSale.Models;
 
 namespace WebAssignmentSale.Controllers
 {
+    [CheckSessionFilter]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -27,255 +28,172 @@ namespace WebAssignmentSale.Controllers
             //check session
             var session = _contextAccessor.HttpContext.Session;
 
-            if (session.GetString("EmpId") != null &&
-                session.GetString("LogId") != null &&
-                session.GetString("PosStatus") != null &&
-                session.GetString("UserName") != null)
+
+            var LoggedInEmpId = session.GetString("EmpId");
+            var LoggedInLogId = session.GetString("LogId");
+            var LoggedInUserName = session.GetString("UserName");
+            var LoggedInPosStatus = session.GetString("PosStatus");
+
+            try
             {
-                var LoggedInEmpId = session.GetString("EmpId");
-                var LoggedInLogId = session.GetString("LogId");
-                var LoggedInUserName = session.GetString("UserName");
-                var LoggedInPosStatus = session.GetString("PosStatus");
+                ViewBag.SearchQuery = HttpUtility.HtmlDecode(searchQuery);
+                ViewBag.SearchDateQuery = HttpUtility.HtmlDecode(searchDateQuery);
 
-                try
+                int totalItems = GetTotalItemCountSummary(LoggedInEmpId, searchQuery, searchDateQuery);
+                int itemsPerPage = 10; // ¶éÒäÁèä´éÃÑº¤èÒ pageSize ÁÒãËéãªé¤èÒàÃÔèÁµé¹à»ç¹ 10
+                int pageCount = (int)Math.Ceiling((double)totalItems / itemsPerPage);
+
+                if (page > pageCount)
                 {
-                    ViewBag.SearchQuery = HttpUtility.HtmlDecode(searchQuery);
-                    ViewBag.SearchDateQuery = HttpUtility.HtmlDecode(searchDateQuery);
-
-                    int totalItems = GetTotalItemCountSummary(LoggedInEmpId, searchQuery, searchDateQuery);
-                    int itemsPerPage = 10; // ¶éÒäÁèä´éÃÑº¤èÒ pageSize ÁÒãËéãªé¤èÒàÃÔèÁµé¹à»ç¹ 10
-                    int pageCount = (int)Math.Ceiling((double)totalItems / itemsPerPage);
-
-                    if (page > pageCount)
-                    {
-                        page = pageCount;
-                    }
-
-                    var items = GetAssignFromDB(LoggedInEmpId, page, itemsPerPage, searchQuery, searchDateQuery);
-
-                    var viewModel = new Models.PageModel
-                    {
-                        Items = items,
-                        PageCount = pageCount,
-                        CurrentPage = page,
-                        ItemsPerPage = itemsPerPage,
-                        TotalItems = totalItems
-                    };
-
-                    return View(viewModel);
+                    page = pageCount;
                 }
-                catch (Exception ex)
+
+                var items = GetAssignFromDB(LoggedInEmpId, page, itemsPerPage, searchQuery, searchDateQuery);
+
+                var viewModel = new Models.PageModel
                 {
-                    ViewBag.Error = "An error occurred : " + ex.Message;
-                    return View();
-                }
+                    Items = items,
+                    PageCount = pageCount,
+                    CurrentPage = page,
+                    ItemsPerPage = itemsPerPage,
+                    TotalItems = totalItems
+                };
+
+                return View(viewModel);
             }
-            else
+            catch (Exception ex)
             {
-                // ËÒ¡äÁèÁÕ¢éÍÁÙÅã¹ Session ãËé redirect ä»ÂÑ§Ë¹éÒ Login
-                TempData["SessionError"] = "Not found session";
-                //TempData["SessionError"] = "äÁè¾º¤èÒã¹ Session Error : " + ex.Message;
-                return RedirectToAction("Login", "Login");
+                ViewBag.Error = "An error occurred : " + ex.Message;
+                return View();
             }
+
         }
 
         public IActionResult Report(string searchQuery, string searchDateQuery, int page = 1)
         {
-            //check session
-            var session = _contextAccessor.HttpContext.Session;
 
-            if (session.GetString("EmpId") != null &&
-                session.GetString("LogId") != null &&
-                session.GetString("PosStatus") != null &&
-                session.GetString("UserName") != null)
+            try
             {
-                try
+                ViewBag.SearchQuery = HttpUtility.HtmlDecode(searchQuery);
+                ViewBag.SearchDateQuery = HttpUtility.HtmlDecode(searchDateQuery);
+
+                int totalItems = GetTotalItemCountReport(searchQuery, searchDateQuery);
+                int itemsPerPage = 10;
+                int pageCount = (int)Math.Ceiling((double)totalItems / itemsPerPage);
+
+                if (page > pageCount)
                 {
-                    ViewBag.SearchQuery = HttpUtility.HtmlDecode(searchQuery);
-                    ViewBag.SearchDateQuery = HttpUtility.HtmlDecode(searchDateQuery);
-
-                    int totalItems = GetTotalItemCountReport(searchQuery, searchDateQuery); 
-                    int itemsPerPage = 10; 
-                    int pageCount = (int)Math.Ceiling((double)totalItems / itemsPerPage); 
-
-                    if (page > pageCount)
-                    {
-                        page = pageCount;
-                    }
-
-
-                    var items = GetReportFromDB(searchQuery, page, itemsPerPage, searchDateQuery);
-
-                    var viewModel = new Models.PageModel
-                    {
-                        Items = items,
-                        PageCount = pageCount,
-                        CurrentPage = page,
-                        ItemsPerPage = itemsPerPage,
-                        TotalItems = totalItems
-                    };
-
-                    return View(viewModel);
+                    page = pageCount;
                 }
-                catch (Exception ex)
+
+
+                var items = GetReportFromDB(searchQuery, page, itemsPerPage, searchDateQuery);
+
+                var viewModel = new Models.PageModel
                 {
-                    ModelState.AddModelError("", "An error occurred : " + ex.Message);
-                    ViewBag.Error = "An error occurred : " + ex.Message;
-                    return View(); 
-                }
+                    Items = items,
+                    PageCount = pageCount,
+                    CurrentPage = page,
+                    ItemsPerPage = itemsPerPage,
+                    TotalItems = totalItems
+                };
+
+                return View(viewModel);
             }
-            else
+            catch (Exception ex)
             {
-                TempData["SessionError"] = "Not found session";
-                return RedirectToAction("Login", "Login");
+                ModelState.AddModelError("", "An error occurred : " + ex.Message);
+                ViewBag.Error = "An error occurred : " + ex.Message;
+                return View();
             }
+
         }
 
         public IActionResult InsertAssignment()
         {
-            //check session
-            var session = _contextAccessor.HttpContext.Session;
 
-            if (session.GetString("EmpId") != null &&
-                session.GetString("LogId") != null &&
-                session.GetString("PosStatus") != null &&
-                session.GetString("UserName") != null)
-            {
-                //start method
-                var province = GetProvinceInDB();
-                var amphure = GetAmphureInDB();
-                var district = GetDistrictInDB();
-                var address = new AddressModel();
-                address.Provinces = province;
-                address.Amphures = amphure;
-                address.Districts = district;
-                return View(address);
-            }
-            else
-            {
-                TempData["SessionError"] = "Not found session";
-                return RedirectToAction("Login", "Login");
-            }
+            //start method
+            var province = GetProvinceInDB();
+            var amphure = GetAmphureInDB();
+            var district = GetDistrictInDB();
+            var address = new AddressModel();
+            address.Provinces = province;
+            address.Amphures = amphure;
+            address.Districts = district;
+            return View(address);
+
         }
 
         public IActionResult EditAssign(int AssignSaleId, string searchQuery, string searchDateQuery, int page = 1)
         {
-            //check session
-            var session = _contextAccessor.HttpContext.Session;
 
-            if (session.GetString("EmpId") != null &&
-                session.GetString("LogId") != null &&
-                session.GetString("PosStatus") != null &&
-                session.GetString("UserName") != null)
-            {
-                //start method
-                var sales = GetAssignById(AssignSaleId);
-                var province = GetProvinceInDB();
-                var amphure = GetAmphureById(AssignSaleId);
-                var district = GetDistrictById(AssignSaleId);
-                AddressIdModel address = new AddressIdModel();
-                address.AssignmentSales = sales;
-                address.Provinces = province;
-                address.Amphures = amphure;
-                address.Districts = district;
-                address.CurrentPage = page;
+            //start method
+            var sales = GetAssignById(AssignSaleId);
+            var province = GetProvinceInDB();
+            var amphure = GetAmphureById(AssignSaleId);
+            var district = GetDistrictById(AssignSaleId);
+            AddressIdModel address = new AddressIdModel();
+            address.AssignmentSales = sales;
+            address.Provinces = province;
+            address.Amphures = amphure;
+            address.Districts = district;
+            address.CurrentPage = page;
 
-                ViewBag.SearchQuery = HttpUtility.UrlEncode(searchQuery);
-                ViewBag.SearchDateQuery = HttpUtility.UrlEncode(searchDateQuery);
+            ViewBag.SearchQuery = HttpUtility.UrlEncode(searchQuery);
+            ViewBag.SearchDateQuery = HttpUtility.UrlEncode(searchDateQuery);
 
-                return View(address);
-            }
-            else
-            {
-                TempData["SessionError"] = "Not found session";
-                return RedirectToAction("Login", "Login");
-            }
+            return View(address);
+
         }
 
         public IActionResult EditReportAssign(int AssignSaleId, string searchQuery, string searchDateQuery, int page = 1)
         {
-            //check session
-            var session = _contextAccessor.HttpContext.Session;
 
-            if (session.GetString("EmpId") != null &&
-                session.GetString("LogId") != null &&
-                session.GetString("PosStatus") != null &&
-                session.GetString("UserName") != null)
-            {
-                //start method
-                var sales = GetAssignById(AssignSaleId);
-                var province = GetProvinceInDB();
-                var amphure = GetAmphureById(AssignSaleId);
-                var district = GetDistrictById(AssignSaleId);
-                AddressIdModel address = new AddressIdModel();
-                address.AssignmentSales = sales;
-                address.Provinces = province;
-                address.Amphures = amphure;
-                address.Districts = district;
-                address.CurrentPage = page;
+            //start method
+            var sales = GetAssignById(AssignSaleId);
+            var province = GetProvinceInDB();
+            var amphure = GetAmphureById(AssignSaleId);
+            var district = GetDistrictById(AssignSaleId);
+            AddressIdModel address = new AddressIdModel();
+            address.AssignmentSales = sales;
+            address.Provinces = province;
+            address.Amphures = amphure;
+            address.Districts = district;
+            address.CurrentPage = page;
 
-                ViewBag.SearchQuery = HttpUtility.UrlEncode(searchQuery);
-                ViewBag.SearchDateQuery = HttpUtility.UrlEncode(searchDateQuery);
+            ViewBag.SearchQuery = HttpUtility.UrlEncode(searchQuery);
+            ViewBag.SearchDateQuery = HttpUtility.UrlEncode(searchDateQuery);
 
-                return View(address);
-            }
-            else
-            {
-                TempData["SessionError"] = "Not found session";
-                return RedirectToAction("Login", "Login");
-            }
+            return View(address);
+
         }
 
         public IActionResult EditEmployee(int EmpId)
         {
-            //check session
-            var session = _contextAccessor.HttpContext.Session;
 
-            if (session.GetString("EmpId") != null &&
-                session.GetString("LogId") != null &&
-                session.GetString("PosStatus") != null &&
-                session.GetString("UserName") != null)
+            //start method
+            var employee = GetEmployeeById(EmpId);
+            var pos = GetPosFromDB();
+            PositionViewModel nice = new PositionViewModel();
+            nice.Positions = pos;
+            nice.Employee = employee;
+
+
+            if (employee == null)
             {
-                //start method
-                var employee = GetEmployeeById(EmpId);
-                var pos = GetPosFromDB();
-                PositionViewModel nice = new PositionViewModel();
-                nice.Positions = pos;
-                nice.Employee = employee;
-
-
-                if (employee == null)
-                {
-                    return RedirectToAction("Summary", "Home");
-                }
-                return View(nice);
+                return RedirectToAction("Summary", "Home");
             }
-            else
-            {
-                TempData["SessionError"] = "Not found session";
-                return RedirectToAction("Login", "Login");
-            }
+            return View(nice);
+
         }
 
         public IActionResult Setting(int EmpId)
         {
-            //check session
-            var session = _contextAccessor.HttpContext.Session;
 
-            if (session.GetString("EmpId") != null &&
-                session.GetString("LogId") != null &&
-                session.GetString("PosStatus") != null &&
-                session.GetString("UserName") != null)
-            {
-                // start method
-                var salesmanager = GetSalesById(EmpId);
-                return View(salesmanager);
-            }
-            else
-            {
-                TempData["SessionError"] = "Not found session";
-                return RedirectToAction("Login", "Login");
-            }
+            // start method
+            var salesmanager = GetSalesById(EmpId);
+            return View(salesmanager);
+
         }
         //End -> View
 

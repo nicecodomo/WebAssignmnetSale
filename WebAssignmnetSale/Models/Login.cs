@@ -17,6 +17,7 @@ namespace WebAssignmentSale.Models
         public string PosName { get; set; }
         public string DepName { get; set; }
         public string PosPermissions { get; set; }
+        public bool RememberMe { get; set; }
 
         public Employee Employee { get; set; }
         public Position Position { get; set; }
