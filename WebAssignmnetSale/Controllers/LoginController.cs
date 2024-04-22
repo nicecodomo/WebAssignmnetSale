@@ -28,14 +28,14 @@ namespace WebAssignmentSale.Controllers
         [HttpGet]
         public IActionResult Login()
         {
+            var model = new Login();
+
+            // ตรวจสอบคุกกี้
             if (Request.Cookies.ContainsKey("username") && Request.Cookies.ContainsKey("password"))
             {
-                var Username = Request.Cookies["username"];
-                var Password = Request.Cookies["password"];
-
-                // เติมข้อมูลในฟอร์ม
-                var model = new Login { Username = Username, Password = Password };
-                return View(model);
+                model.Username = Request.Cookies["username"];
+                model.Password = Request.Cookies["password"];
+                model.RememberMe = true; // ตั้งค่า RememberMe เป็น true เพื่อเปิด checkbox
             }
 
             if (TempData.ContainsKey("SessionError"))
@@ -43,7 +43,7 @@ namespace WebAssignmentSale.Controllers
                 ViewData["SessionError"] = TempData["SessionError"].ToString();
             }
 
-            return View();
+            return View(model);
         }
 
 

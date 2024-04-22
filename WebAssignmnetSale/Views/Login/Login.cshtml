@@ -89,25 +89,28 @@
 
                 <form asp-controller="Login" asp-action="Login" method="post">
                     <div class="input-group py-2">
-                        <input id="Username" name="Username" asp-for="Username" type="text" class="form-control" placeholder="Enter Username">
+                        <input id="Username" name="Username" asp-for="Username" type="text" class="form-control" placeholder="Enter Username" value="@Model.Username">
                         <div class="input-group-append">
                             <div class="input-group-text">
                                 <span class="fas fa-envelope"></span>
                             </div>
                         </div>
                     </div>
+
                     @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ContainsKey("Username"))
                     {
                         <span class="text-danger"><b>@ViewData.ModelState["Username"].Errors.FirstOrDefault()?.ErrorMessage</b></span>
                     }
+
                     <div class="input-group py-2">
-                        <input id="Password" name="Password" asp-for="Password" type="password" class="form-control" placeholder="Enter Password">
+                        <input id="Password" name="Password" asp-for="Password" type="password" class="form-control" placeholder="Enter Password" value="@Model.Password">
                         <div class="input-group-append">
                             <div class="input-group-text">
                                 <span class="fas fa-lock"></span>
                             </div>
                         </div>
                     </div>
+
                     @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ContainsKey("Password"))
                     {
                         <span class="text-danger"><b>@ViewData.ModelState["Password"].Errors.FirstOrDefault()?.ErrorMessage</b></span>
@@ -116,7 +119,7 @@
                     <div class="row pt-1">
                         <div class="col-8">
                             <div class="icheck-primary text-light">
-                                <input type="checkbox" id="remember" name="RememberMe">
+                                <input type="checkbox" id="remember" name="RememberMe" @(Model.RememberMe ? "checked" : "")>
                                 <label for="remember">
                                     Remember Me
                                 </label>
