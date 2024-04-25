@@ -89,7 +89,7 @@
 
                 <form asp-controller="Login" asp-action="Login" method="post">
                     <div class="input-group py-2">
-                        <input id="Username" name="Username" asp-for="Username" type="text" class="form-control" placeholder="Enter Username" value="@Model.Username">
+                        <input id="Username" name="Username" asp-for="Username" type="text" class="form-control" placeholder="Enter Username" value="@ViewBag.RememberMeUsername">
                         <div class="input-group-append">
                             <div class="input-group-text">
                                 <span class="fas fa-envelope"></span>
@@ -103,7 +103,7 @@
                     }
 
                     <div class="input-group py-2">
-                        <input id="Password" name="Password" asp-for="Password" type="password" class="form-control" placeholder="Enter Password" value="@Model.Password">
+                        <input id="Password" name="Password" asp-for="Password" type="password" class="form-control" placeholder="Enter Password" value="@ViewBag.RememberMePassword">
                         <div class="input-group-append">
                             <div class="input-group-text">
                                 <span class="fas fa-lock"></span>
@@ -119,7 +119,7 @@
                     <div class="row pt-1">
                         <div class="col-8">
                             <div class="icheck-primary text-light">
-                                <input type="checkbox" id="remember" name="RememberMe" @(Model.RememberMe ? "checked" : "")>
+                                <input type="checkbox" id="remember" name="RememberMe" asp-for="RememberMe">
                                 <label for="remember">
                                     Remember Me
                                 </label>

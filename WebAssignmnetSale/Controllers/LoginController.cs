@@ -31,13 +31,17 @@ namespace WebAssignmentSale.Controllers
             var model = new Login();
 
             // ตรวจสอบคุกกี้
-            if (Request.Cookies.ContainsKey("username") && Request.Cookies.ContainsKey("password"))
+            if (Request.Cookies.TryGetValue("RememberMe", out string rememberMeValue))
             {
-                model.Username = Request.Cookies["username"];
-                model.Password = Request.Cookies["password"];
-                model.RememberMe = true; // ตั้งค่า RememberMe เป็น true เพื่อเปิด checkbox
+                var values = rememberMeValue.Split('|');
+                if (values.Length == 2)
+                {
+                    ViewBag.RememberMeUsername = values[0];
+                    ViewBag.RememberMePassword = values[1];
+                }
             }
 
+            //alert error session
             if (TempData.ContainsKey("SessionError"))
             {
                 ViewData["SessionError"] = TempData["SessionError"].ToString();
@@ -79,9 +83,14 @@ namespace WebAssignmentSale.Controllers
 
                         if (login.RememberMe)
                         {
-                            // บันทึกข้อมูลการเข้าสู่ระบบลงในคุกกี้
-                            Response.Cookies.Append("username", login.Username);
-                            Response.Cookies.Append("password", login.Password);
+                            Response.Cookies.Append("RememberMe", $"{login.Username}|{login.Password}", new 
+                                CookieOptions
+                            {
+                                Expires = DateTime.UtcNow.AddDays(1),
+                                HttpOnly = true,
+                                Secure = true,
+                                SameSite = SameSiteMode.None
+                            });
                         }
 
                         //นำข้อมูลใส่ใน cookie เพื่อนำไปใช้ที่อื่น
