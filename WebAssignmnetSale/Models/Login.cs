@@ -21,6 +21,5 @@ namespace WebAssignmentSale.Models
 
         public Employee Employee { get; set; }
         public Position Position { get; set; }
-        public Department Department { get; set; }
     }
 }

@@ -56,6 +56,22 @@
         </div>
     }
 
+    <!--Alert TempData From LoginController-->
+    @if (TempData["CookieNotFoundError"] != null)
+    {
+        <div class="alert alert-danger" role="alert">
+            @TempData["CookieNotFoundError"]
+        </div>
+    }
+
+     <!--Alert TempData From LoginController-->
+    @if (TempData["CookieError"] != null)
+    {
+        <div class="alert alert-danger" role="alert">
+            @TempData["CookieError"]
+        </div>
+    }
+
 
     <!--Alert ModelState From LoginController-->
     @* @if (!ViewData.ModelState.IsValid)

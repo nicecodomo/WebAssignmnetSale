@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Authorization;
 using WebAssignmentSale.Models;
 using Microsoft.AspNetCore.Session;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 
 namespace WebAssignmentSale.Controllers
@@ -25,20 +27,48 @@ namespace WebAssignmentSale.Controllers
             //_session = httpContextAccessor.HttpContext.Session;
         }
 
+
         [HttpGet]
         public IActionResult Login()
         {
             var model = new Login();
 
-            // ตรวจสอบคุกกี้
-            if (Request.Cookies.TryGetValue("RememberMe", out string rememberMeValue))
+            try
             {
-                var values = rememberMeValue.Split('|');
-                if (values.Length == 2)
+                // ตรวจสอบคุกกี้
+                if (Request.Cookies.TryGetValue("RememberMe", out string rememberMeValue))
                 {
-                    ViewBag.RememberMeUsername = values[0];
-                    ViewBag.RememberMePassword = values[1];
+                    var values = rememberMeValue.Split('|');
+                    if (values.Length == 2)
+                    {
+                        ViewBag.RememberMeUsername = values[0];
+                        ViewBag.RememberMePassword = values[1];
+
+                        // เก็บค่า Username จากคุกกี้ใน session
+                        var session = _contextAccessor.HttpContext.Session;
+                        session.SetString("UserName", values[0]);
+                        session.SetString("EmpId", Request.Cookies["EmpId"]);
+                        session.SetString("LogId", Request.Cookies["LogId"]);
+                        session.SetString("PosStatus", Request.Cookies["PosStatus"]);
+
+                        // Redirect to SummarySale if RememberMe is true
+                        return RedirectToAction("SummarySale", "Home");
+                    }
+                    else
+                    {
+                        // แจ้งเตือนว่าคุกกี้ไม่ครบ
+                        Response.Cookies.Delete("RememberMe");
+                        TempData["CookieNotFoundError"] = "Cookies are not found.";
+                        return RedirectToAction("Login", "Login");
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                // แจ้งเตือนว่าเกิดข้อผิดพลาดในการดึงคุกกี้
+                Response.Cookies.Delete("RememberMe");
+                TempData["CookieError"] = "An error occurred while processing cookies.";
+                return RedirectToAction("Login", "Login");
             }
 
             //alert error session
@@ -56,9 +86,10 @@ namespace WebAssignmentSale.Controllers
         {
             try
             {
+
                 using (MySqlConnection connection = new MySqlConnection(_configuration.GetConnectionString("connectionStr")))
                 {
-                    
+
                     connection.Open();
 
                     string sqlquery = "SELECT  a.*,l.*,p.*,e.*,po.* FROM tb_access AS a " +
@@ -73,8 +104,8 @@ namespace WebAssignmentSale.Controllers
 
                     cmd.Parameters.AddWithValue("@Username", login.Username);
                     cmd.Parameters.AddWithValue("@Password", login.Password);
-                    cmd.Parameters.AddWithValue("@EmpId", login.EmpId);
-                    cmd.Parameters.AddWithValue("@PosPermissions", login.PosPermissions);
+                    //cmd.Parameters.AddWithValue("@EmpId", login.EmpId);
+                    //cmd.Parameters.AddWithValue("@PosPermissions", login.PosPermissions);
 
                     var reader = cmd.ExecuteReader();
 
@@ -83,8 +114,28 @@ namespace WebAssignmentSale.Controllers
 
                         if (login.RememberMe)
                         {
-                            Response.Cookies.Append("RememberMe", $"{login.Username}|{login.Password}", new 
-                                CookieOptions
+                            Response.Cookies.Append("RememberMe", $"{login.Username}|{login.Password}", new CookieOptions
+                            {
+                                Expires = DateTime.UtcNow.AddDays(1),
+                                HttpOnly = true,
+                                Secure = true,
+                                SameSite = SameSiteMode.None
+                            });
+                            Response.Cookies.Append("EmpId", $"{reader["emp_id"]}", new CookieOptions
+                            {
+                                Expires = DateTime.UtcNow.AddDays(1),
+                                HttpOnly = true,
+                                Secure = true,
+                                SameSite = SameSiteMode.None
+                            });
+                            Response.Cookies.Append("LogId", $"{reader["log_id"]}", new CookieOptions
+                            {
+                                Expires = DateTime.UtcNow.AddDays(1),
+                                HttpOnly = true,
+                                Secure = true,
+                                SameSite = SameSiteMode.None
+                            });
+                            Response.Cookies.Append("PosStatus", $"{reader["pos_permissions_manage"]}", new CookieOptions
                             {
                                 Expires = DateTime.UtcNow.AddDays(1),
                                 HttpOnly = true,
@@ -152,6 +203,11 @@ namespace WebAssignmentSale.Controllers
             {
                 // ลบ session ทั้งหมด
                 _contextAccessor.HttpContext.Session.Clear();
+
+                Response.Cookies.Delete("RememberMe");
+                Response.Cookies.Delete("EmpId");
+                Response.Cookies.Delete("LogId");
+                Response.Cookies.Delete("PosStatus");
 
                 // Redirect กลับไปยังหน้า login
                 return RedirectToAction("Login", "Login");

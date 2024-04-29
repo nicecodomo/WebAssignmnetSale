@@ -40,7 +40,7 @@ namespace WebAssignmentSale.Controllers
                 ViewBag.SearchDateQuery = HttpUtility.HtmlDecode(searchDateQuery);
 
                 int totalItems = GetTotalItemCountSummary(LoggedInEmpId, searchQuery, searchDateQuery);
-                int itemsPerPage = 10; // ¶éÒäÁèä´éÃÑº¤èÒ pageSize ÁÒãËéãªé¤èÒàÃÔèÁµé¹à»ç¹ 10
+                int itemsPerPage = 10; 
                 int pageCount = (int)Math.Ceiling((double)totalItems / itemsPerPage);
 
                 if (page > pageCount)
@@ -168,25 +168,6 @@ namespace WebAssignmentSale.Controllers
 
         }
 
-        public IActionResult EditEmployee(int EmpId)
-        {
-
-            //start method
-            var employee = GetEmployeeById(EmpId);
-            var pos = GetPosFromDB();
-            PositionViewModel nice = new PositionViewModel();
-            nice.Positions = pos;
-            nice.Employee = employee;
-
-
-            if (employee == null)
-            {
-                return RedirectToAction("Summary", "Home");
-            }
-            return View(nice);
-
-        }
-
         public IActionResult Setting(int EmpId)
         {
 
@@ -223,7 +204,6 @@ namespace WebAssignmentSale.Controllers
             {
                 connection.Open();
 
-                // ÊÃéÒ§¤ÓÊÑè§ SQL à¾×èÍ¹Ñº¨Ó¹Ç¹ÃÒÂ¡ÒÃ·Ñé§ËÁ´
                 string sql = "SELECT COUNT(*) FROM tb_assignment_sale AS a " +
                     "LEFT JOIN tb_employee AS e ON a.emp_id = e.emp_id " +
                     "LEFT JOIN provinces AS p ON a.pro_id = p.id " +
@@ -233,7 +213,6 @@ namespace WebAssignmentSale.Controllers
                     "OR p.name_th_pro LIKE @SearchQuery OR am.name_th_amp LIKE @SearchQuery OR d.name_th_dis LIKE @SearchQuery " +
                     $"OR a.customer LIKE @SearchQuery) AND (a.create_date LIKE @SearchDateQuery) ";
 
-                // ÊÃéÒ§áÅÐ»ÃÐÁÇÅ¼Å¤ÓÊÑè§ SQL
                 MySqlCommand command = new MySqlCommand(sql, connection);
                 command.Parameters.AddWithValue("@SearchQuery", "%" + searchQuery + "%");
                 command.Parameters.AddWithValue("@SearchDateQuery", "%" + searchDateQuery + "%");
@@ -241,7 +220,6 @@ namespace WebAssignmentSale.Controllers
 
                 int totalItemCount = (int)(long)command.ExecuteScalar();
 
-                // ¤×¹¤èÒ¨Ó¹Ç¹ÃÒÂ¡ÒÃ·Ñé§ËÁ´
                 return totalItemCount;
             }
         }
@@ -255,7 +233,6 @@ namespace WebAssignmentSale.Controllers
             {
                 connection.Open();
 
-                // ÊÃéÒ§¤ÓÊÑè§ SQL à¾×èÍ¹Ñº¨Ó¹Ç¹ÃÒÂ¡ÒÃ·Ñé§ËÁ´
                 string sql = "SELECT COUNT(*) FROM tb_assignment_sale AS a " +
                     "LEFT JOIN tb_employee AS e ON a.emp_id = e.emp_id " +
                     "LEFT JOIN tb_login AS l ON e.emp_id = l.emp_id " +
@@ -267,14 +244,12 @@ namespace WebAssignmentSale.Controllers
                     "OR a.customer LIKE @SearchQuery OR l.Username LIKE @SearchQuery) " +
                     "AND (a.create_date LIKE @SearchDateQuery) ";
 
-                // ÊÃéÒ§áÅÐ»ÃÐÁÇÅ¼Å¤ÓÊÑè§ SQL
                 MySqlCommand command = new MySqlCommand(sql, connection);
                 command.Parameters.AddWithValue("@SearchQuery", "%" + searchQuery + "%");
                 command.Parameters.AddWithValue("@SearchDateQuery", "%" + searchDateQuery + "%");
 
                 int totalItemCount = (int)(long)command.ExecuteScalar();
 
-                // ¤×¹¤èÒ¨Ó¹Ç¹ÃÒÂ¡ÒÃ·Ñé§ËÁ´
                 return totalItemCount;
             }
         }
@@ -306,7 +281,6 @@ namespace WebAssignmentSale.Controllers
                         PName = reader["name_th_pro"].ToString()
                     };
 
-                    // áÅÐÊÒÁÒÃ¶´Ö§¢éÍÁÙÅ Position ¨Ò¡µÒÃÒ§ tb_position ä´éµÒÁµéÍ§¡ÒÃ
 
 
                     provinces.Add(pro);
@@ -348,7 +322,6 @@ namespace WebAssignmentSale.Controllers
                         ProId = Convert.ToInt32(reader["province_id"])
                     };
 
-                    // áÅÐÊÒÁÒÃ¶´Ö§¢éÍÁÙÅ Position ¨Ò¡µÒÃÒ§ tb_position ä´éµÒÁµéÍ§¡ÒÃ
 
 
                     amphures.Add(amphure);
@@ -391,7 +364,6 @@ namespace WebAssignmentSale.Controllers
                         AmpId = Convert.ToInt32(reader["amphure_id"])
                     };
 
-                    // áÅÐÊÒÁÒÃ¶´Ö§¢éÍÁÙÅ Position ¨Ò¡µÒÃÒ§ tb_position ä´éµÒÁµéÍ§¡ÒÃ
 
 
                     district.Add(districts);
@@ -560,7 +532,6 @@ namespace WebAssignmentSale.Controllers
                         AmpId = Convert.ToInt32(reader["amphure_id"])
                     };
 
-                    // áÅÐÊÒÁÒÃ¶´Ö§¢éÍÁÙÅ Position ¨Ò¡µÒÃÒ§ tb_position ä´éµÒÁµéÍ§¡ÒÃ
 
                     districts.Add(district);
                 }
@@ -586,7 +557,6 @@ namespace WebAssignmentSale.Controllers
         {
             try
             {
-                // ´Ö§¢éÍÁÙÅ¨Ò¡°Ò¹¢éÍÁÙÅµÒÁ assignSaleId
                 var locationDetails = GetLocationDetailsFromDatabase(assignSaleId);
 
                 if (locationDetails != null)
@@ -595,12 +565,11 @@ namespace WebAssignmentSale.Controllers
                 }
                 else
                 {
-                    return Json(null); // ËÃ×Í¤×¹¤èÒµÒÁ·Õè¤Ø³µéÍ§¡ÒÃ
+                    return Json(null); 
                 }
             }
             catch (Exception ex)
             {
-                // ËÃ×Íãªé Serilog, NLog, ËÃ×ÍÇÔ¸Õ¡ÒÃ log Í×è¹ æ µÒÁ·Õè¤Ø³ãªé
                 Console.WriteLine($"Error fetching location details: {ex.Message}");
                 return Json(null);
             }
@@ -610,9 +579,7 @@ namespace WebAssignmentSale.Controllers
         {
             try
             {
-                // ¹Ó¤èÒ assignSaleId ä» query ¢éÍÁÙÅ¨Ò¡°Ò¹¢éÍÁÙÅ (ã¹·Õè¹ÕéÊÁÁµÔÇèÒ¤Ø³¨Ðãªé ADO.NET)
 
-                // µÑÇÍÂèÒ§â¤é´ ADO.NET
                 using (MySqlConnection connection = new MySqlConnection(_configuration.GetConnectionString("connectionStr")))
                 {
                     connection.Open();
@@ -628,7 +595,6 @@ namespace WebAssignmentSale.Controllers
                             double latitude = reader.GetDouble("Latitude");
                             double longitude = reader.GetDouble("Longitude");
 
-                            // ÊÃéÒ§ LocationDetailsModel ËÃ×Íãªé model ·Õè¤Ø³¡ÓË¹´àÍ§
                             var locationDetails = new AssignmentSale
                             {
                                 Latitude = latitude,
@@ -647,9 +613,8 @@ namespace WebAssignmentSale.Controllers
             }
             catch (Exception ex)
             {
-                // ã¹¡Ã³Õ·ÕèÁÕ¢éÍ¼Ô´¾ÅÒ´ã¹¡ÒÃàª×èÍÁµèÍ¡Ñº°Ò¹¢éÍÁÙÅ
                 Console.WriteLine($"Error fetching location details from database: {ex.Message}");
-                throw; // ÊÒÁÒÃ¶¨Ñ´¡ÒÃä´éµèÍä»¶éÒ¤Ø³µéÍ§¡ÒÃ
+                throw;
             }
         }
         //End -> Get location
@@ -668,9 +633,8 @@ namespace WebAssignmentSale.Controllers
             {
                 connection.Open();
 
-                int offset = (page - 1) * itemsPerPage; // ¤Ó¹Ç³ offset ÊÓËÃÑº¡ÒÃ´Ö§¢éÍÁÙÅË¹éÒ»Ñ¨¨ØºÑ¹
+                int offset = (page - 1) * itemsPerPage; 
 
-                // ¡ÓË¹´¤ÓÊÑè§ SQL ¾ÃéÍÁàÃÕÂ§ÅÓ´Ñº¢éÍÁÙÅµÒÁ¤ÍÅÑÁ¹ì·Õè¡ÓË¹´
                 string sqlSelect = @"
             SELECT a.*, p.*, am.*, d.*
             FROM tb_assignment_sale AS a
@@ -740,7 +704,7 @@ namespace WebAssignmentSale.Controllers
             {
                 connection.Open();
 
-                int offset = (page - 1) * itemsPerPage; // ¤Ó¹Ç³ offset ÊÓËÃÑº¡ÒÃ´Ö§¢éÍÁÙÅË¹éÒ»Ñ¨¨ØºÑ¹
+                int offset = (page - 1) * itemsPerPage;
 
                 string sqlSelect = "SELECT a.*,e.*,l.username,p.*,am.*,d.* FROM tb_assignment_sale AS a " +
                     "LEFT JOIN tb_employee AS e ON a.emp_id = e.emp_id " +
@@ -932,7 +896,6 @@ namespace WebAssignmentSale.Controllers
         public IActionResult InsertAssign(AssignmentSale InsertAssign)
         {
 
-            // µÃÇ¨ÊÍºÇèÒ Latitude áÅÐ Longitude äÁèÇèÒ§
             if (InsertAssign.Latitude == 0.0 || InsertAssign.Longitude == 0.0)
             {
                 TempData["ErrorMessage"] = "à¡Ô´¢éÍ¼Ô´¾ÅÒ´ã¹¡ÒÃà¾ÔèÁ¾¹Ñ¡§Ò¹: µéÍ§ÃÐºØ¤èÒÅÐµÔ¨Ù´áÅÐÅÍ§¨Ô¨Ù´";
@@ -1137,6 +1100,59 @@ namespace WebAssignmentSale.Controllers
             {
                 connection.Close();
             }
+        }
+
+        private Employee GetEmployeeById(int EmpId)
+        {
+            Employee employee = null;
+
+            string connectionString = _configuration.GetConnectionString("connectionStr");
+            using MySqlConnection connection = new MySqlConnection(connectionString);
+
+            try
+            {
+                connection.Open();
+
+                string sqlSelect = $"SELECT * FROM tb_employee WHERE emp_id = {EmpId}";
+                MySqlCommand command = new MySqlCommand(sqlSelect, connection);
+                using MySqlDataReader reader = command.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    employee = new Employee
+                    {
+                        CreateBy = reader["create_by"].ToString(),
+                        CreateDate = Convert.ToDateTime(reader["create_date"]),
+                        LastUpdateBy = reader["last_update_by"].ToString(),
+                        LastUpdateDate = Convert.ToDateTime(reader["last_update_date"]),
+                        EmpId = Convert.ToInt32(reader["emp_id"]),
+                        EmpName = reader["emp_name"].ToString(),
+                        DateOfBirth = Convert.ToDateTime(reader["date_of_birth"]),
+                        Address = reader["address"].ToString(),
+                        Email = reader["email"].ToString(),
+                        PhoneNumber = reader["phone_number"].ToString(),
+                        Salary = Convert.ToDecimal(reader["salary"]),
+                        StartDate = Convert.ToDateTime(reader["start_date"]),
+                        EndDate = Convert.ToDateTime(reader["end_date"]),
+                        PosId = Convert.ToInt32(reader["pos_id"])
+                    };
+
+                }
+
+
+
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while fetching employee data from database.");
+            }
+            finally
+            {
+                connection.Close();
+            }
+
+            return employee;
         }
         //End -> Insert, Update Assignment & Sales
 
@@ -1504,65 +1520,7 @@ namespace WebAssignmentSale.Controllers
 
             return positions;
         }
-        private Employee GetEmployeeById(int EmpId)
-        {
-            Employee employee = null;
-
-            string connectionString = _configuration.GetConnectionString("connectionStr");
-            using MySqlConnection connection = new MySqlConnection(connectionString);
-
-            try
-            {
-                connection.Open();
-
-                string sqlSelect = $"SELECT * FROM tb_employee WHERE emp_id = {EmpId}";
-                MySqlCommand command = new MySqlCommand(sqlSelect, connection);
-                using MySqlDataReader reader = command.ExecuteReader();
-
-                if (reader.Read())
-                {
-                    employee = new Employee
-                    {
-                        CreateBy = reader["create_by"].ToString(),
-                        CreateDate = Convert.ToDateTime(reader["create_date"]),
-                        LastUpdateBy = reader["last_update_by"].ToString(),
-                        LastUpdateDate = Convert.ToDateTime(reader["last_update_date"]),
-                        EmpId = Convert.ToInt32(reader["emp_id"]),
-                        EmpName = reader["emp_name"].ToString(),
-                        DateOfBirth = Convert.ToDateTime(reader["date_of_birth"]),
-                        Address = reader["address"].ToString(),
-                        Email = reader["email"].ToString(),
-                        PhoneNumber = reader["phone_number"].ToString(),
-                        Salary = Convert.ToDecimal(reader["salary"]),
-                        StartDate = Convert.ToDateTime(reader["start_date"]),
-                        EndDate = Convert.ToDateTime(reader["end_date"]),
-                        PosId = Convert.ToInt32(reader["pos_id"])
-                    };
-
-                }
-                if (employee != null && employee.CreateBy != null && employee.CreateBy != "")
-                {
-                    EmployeeCreateBy employeecreateby = GetEmployeeByCreateFromDB(employee.CreateBy);
-                    employee.CreateByUsername = employeecreateby.Username;
-
-                    employee.LastByUsername = GetEmployeeByLastUpdateFromDB(employee.LastUpdateBy);
-
-                }
-
-
-
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error while fetching employee data from database.");
-            }
-            finally
-            {
-                connection.Close();
-            }
-
-            return employee;
-        }
+        
         private Position GetPosById(int Id)
         {
             Position position = null;
@@ -1604,41 +1562,7 @@ namespace WebAssignmentSale.Controllers
 
             return position;
         }
-        private EmployeeCreateBy GetEmployeeByCreateFromDB(string createby)
-        {
-            EmployeeCreateBy employee_createby = null;
-
-            string connectionString = _configuration.GetConnectionString("connectionStr");
-            MySqlConnection connection = new MySqlConnection(connectionString);
-
-            try
-            {
-                connection.Open();
-
-                string sqlSelect = $"SELECT * FROM tb_employee WHERE emp_id = {createby}";
-                MySqlCommand command = new MySqlCommand(sqlSelect, connection);
-                MySqlDataReader reader = command.ExecuteReader();
-
-                if (reader.Read())
-                {
-                    employee_createby = new EmployeeCreateBy
-                    {
-
-                        Username = reader["username"].ToString(),
-                    };
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error while fetching employee data from database.");
-            }
-            finally
-            {
-                connection.Close();
-            }
-
-            return employee_createby;
-        }
+        
         private string GetEmployeeByLastUpdateFromDB(string lastupdateby)
         {
             Employee employee_lastupdateby = null;
