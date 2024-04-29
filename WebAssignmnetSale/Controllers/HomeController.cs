@@ -706,9 +706,8 @@ namespace WebAssignmentSale.Controllers
 
                 int offset = (page - 1) * itemsPerPage;
 
-                string sqlSelect = "SELECT a.*,e.*,l.username,p.*,am.*,d.* FROM tb_assignment_sale AS a " +
-                    "LEFT JOIN tb_employee AS e ON a.emp_id = e.emp_id " +
-                    "LEFT JOIN tb_login AS l ON e.emp_id = l.emp_id " +
+                string sqlSelect = "SELECT a.*,l.username,p.*,am.*,d.* FROM tb_assignment_sale AS a " +
+                    "LEFT JOIN tb_login AS l ON a.emp_id = l.emp_id " +
                     "LEFT JOIN provinces AS p ON a.pro_id = p.id " +
                     "LEFT JOIN amphures AS am ON a.amp_id = am.id " +
                     "LEFT JOIN districts AS d ON a.dis_id = d.id " +
@@ -752,11 +751,7 @@ namespace WebAssignmentSale.Controllers
 
                     };
 
-                    if (ass.EmpId == 0)
-                    {
-                        ass.Username = "Admin";
-                    }
-
+                    
                     assignment.Add(ass);
                 }
             }
