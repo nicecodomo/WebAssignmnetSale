@@ -143,7 +143,9 @@
         var currentPage = urlParams.get('page');
 
         // Redirect to the current page
-        window.location.href = '/Home/Report?page=' + currentPage + '&searchQuery=' + decodeURIComponent('@ViewBag.SearchQuery') + '&searchDateQuery=' + decodeURIComponent('@ViewBag.SearchDateQuery');
+        // window.location.href = '/Home/Report?page=' + currentPage + '&searchQuery=' + decodeURIComponent('@ViewBag.SearchQuery') + '&searchDateQuery=' + decodeURIComponent('@ViewBag.SearchDateQuery');
+        window.location.href = '@Url.Action("Report", "Home")' + '?page=' + '@Model.CurrentPage' + '&searchQuery=' + decodeURIComponent('@ViewBag.SearchQuery') + '&searchDateQuery=' + decodeURIComponent('@ViewBag.SearchDateQuery');
+
     }
 </script>
 <!-- End redirect to current page on close button click -->
@@ -227,7 +229,9 @@
                         confirmButtonText: 'OK'
                     }).then((result) => {
                         // Redirect to SummarySale page after closing the alert
-                        window.location.href = '/Home/Report?page=' + encodeURIComponent('@Model.CurrentPage') + '&searchQuery=' + decodeURIComponent('@ViewBag.SearchQuery') + '&searchDateQuery=' + decodeURIComponent('@ViewBag.SearchDateQuery');
+                        // window.location.href = '/Home/Report?page=' + encodeURIComponent('@Model.CurrentPage') + '&searchQuery=' + decodeURIComponent('@ViewBag.SearchQuery') + '&searchDateQuery=' + decodeURIComponent('@ViewBag.SearchDateQuery');
+                        window.location.href = '@Url.Action("Report", "Home")' + '?page=' + '@Model.CurrentPage' + '&searchQuery=' + decodeURIComponent('@ViewBag.SearchQuery') + '&searchDateQuery=' + decodeURIComponent('@ViewBag.SearchDateQuery');
+
                     });
                 },
                 error: function (xhr, status, error) {

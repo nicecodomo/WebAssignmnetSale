@@ -182,8 +182,8 @@
             type: 'GET',
             data: { assignSaleId: assignSaleId },
             success: function (data) {
-                console.log('Data received:', data);
-                console.log('AssignSaleId:', assignSaleId);
+                // console.log('Data received:', data);
+                // console.log('AssignSaleId:', assignSaleId);
 
                 if (data && data.latitude && data.longitude) {
                     var latitude = data.latitude;
@@ -200,8 +200,8 @@
     }
 
     function openGoogleMaps(latitude, longitude) {
-        console.log('Latitude:', latitude);
-        console.log('Longitude:', longitude);
+        // console.log('Latitude:', latitude);
+        // console.log('Longitude:', longitude);
 
         if (latitude && longitude) {
             Swal.fire({
